@@ -84,7 +84,6 @@ ex) [Backend] 프로필 화면에서 로그인 불가하던 문제 해결     (�
 
  ## 🧑‍💻 팀원
 | <img width="100" src="https://github.com/suho0204.png"> | <img width="100" src="https://github.com/rapperboyfriend.png"> | <img width="100" src="https://github.com/minecoby.png"> | <img width="100" src="https://github.com/SonJH7.png"> | <img width="100" src="https://github.com/yoonjung561.png"> | <img width="100" src="https://github.com/hyunjinch.png"> | <img width="100" src="https://github.com/soyoungheo429.png"> | 
-|:----------------------:|:----------------------:|
 | [김수호](https://github.com/suho0204) | [백지은](https://github.com/rapperboyfriend) | [김태우](https://github.com/minecoby) | [손정훈](https://github.com/SonJH7) | [곽윤정](https://github.com/yoonjung561) | [최현진](https://github.com/hyunjinch) | [허소영](https://github.com/soyoungheo429) |
 | 😎 PM | 🎨 Designer | 💻 Backend | 💻 Backend | 💻 Frontend | 💻 Frontend | 💻 Frontend |
 | 15기 | 기수 |

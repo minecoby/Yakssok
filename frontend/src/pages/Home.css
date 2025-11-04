@@ -1,0 +1,16 @@
+.home-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #EAEEE0;
+  overflow: hidden;
+}
+
+/* 사이드바 너비만큼 오른쪽 공간 자동 계산 */
+.main-content {
+  flex: 1;
+  background: #FAFFF2;
+  border-radius: 15px 0 0 15px;
+  padding: 24px;
+  overflow-y: auto;
+}

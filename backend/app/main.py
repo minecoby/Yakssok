@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.base import Base
 from app.db.session import engine
-from app.routes import calendar_route, user_route
+from app.routes import calendar_route, user_route,appointment_route
 from app.services.google_calendar_service import GoogleCalendarService
 from app.variable import FRONTEND_URL
 
@@ -28,7 +28,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_resolve_allowed_origins(FRONTEND_URL),
     allow_credentials=True,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -46,3 +46,4 @@ async def shutdown():
 
 app.include_router(user_route.router, tags=["user"])
 app.include_router(calendar_route.router, tags=["calendar"])
+app.include_router(appointment_route.router, tags=["appointment"])

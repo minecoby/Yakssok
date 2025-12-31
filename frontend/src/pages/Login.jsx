@@ -1,14 +1,34 @@
 import React from 'react';
+import { useEffect } from "react"; 
 import './Login.css';
 import logoImage from "../assets/logo.png";
 import googleLogo from "../assets/googleLogo.png";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config/api";
 
 const Login = () => {
     const navigate = useNavigate();
 
     const navigateToHome = () => {
     navigate("/home");
+    };
+
+    useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+        navigateToHome(); 
+        }
+    }, [navigate]);
+
+    const handleGoogleLogin = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/user/google/login`);
+            const data = await response.json();
+
+            window.location.href = data.auth_url;
+        } catch (error) {
+            console.error("구글 로그인 실패", error);
+        }
     };
 
     return (
@@ -20,7 +40,7 @@ const Login = () => {
             <span className='text-bold'>약쏙</span>
             <span className='text'>으로 더 간편하게.</span>
             <br />
-            <button className='login-button' onClick={navigateToHome}>
+            <button className='login-button' onClick={handleGoogleLogin}>
                 <img src={googleLogo}
                     alt="GoogleLogo"
                     className="googleLogo"/>

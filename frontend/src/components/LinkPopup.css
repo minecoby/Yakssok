@@ -1,0 +1,91 @@
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+.lp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0.28, 0.28, 0.28, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.lp-modal {
+  width: 914px; 
+  height: 378px;
+  background: #F6FAED;
+  border-radius: 20px;
+  padding: 56px 79px;
+  text-align: center;
+}
+
+.lp-title {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 25px;
+  font-weight: 300;
+  color: #1f1f1f;
+  margin-top: 67px;
+  margin-bottom: 53px;
+}
+
+.lp-input-wrap {
+  display: flex;
+  width: 751px;
+  height: 63px;
+  margin: 0 auto 53px;
+  border: 0.5px solid #1F1F1F;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+
+.lp-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0 18px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #85837B;
+}
+
+.lp-copy-btn {
+  width: 68px;
+  height: 63px;
+  border: none;
+  background: #1F1F1F;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 10px 10px 0;
+}
+
+.lp-close-btn {
+  width: 143px;
+  height: 57px;
+  padding: 18px 0;
+  margin: 0;
+  border: none;
+  border-radius: 15px;
+  background: #EAEEE0;
+  color: #1F1F1F;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+}

@@ -1,45 +1,25 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SidebarLeft.css";
 import LogoIcon from "../assets/LogoIcon";
+import OpenButton from "../assets/OpenButton";
+import CloseButton from "../assets/CloseButton";
 import NewButton from "../assets/NewButton";
 import NewButtonClosed from "../assets/NewButtonClosed";
 import CalendarIcon from "../assets/CalendarIcon";
-import MyCalendarIcon from "../assets/MyCalendarIcon";
 import ListIcon from "../assets/ListIcon";
 import CalendarIconSelected from "../assets/CalendarIconSelected";
-import MyCalendarIconSelected from "../assets/MyCalendarIconSelected";
 import ListIconSelected from "../assets/ListIconSelected";
+import ListDot from "../assets/listDot";
 import profileImage from "../assets/profile.jpg";
 
-const Sidebar = ({ events = [] }) => {
+const SidebarLeft = ({ events = [] }) => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
 
   // 사이드바 상태
   const [isOpen, setIsOpen] = useState(false);
-
-  // 사이드바 닫힘 영역 hover 시 자동 열기
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isOpen && e.clientX < 30) {
-        setIsOpen(true);
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [isOpen]);
-
-  // 사이드바 열림 영역 바깥 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const [setIsLogoHovered] = useState(false);
 
   // 달력 상태
   const today = new Date();
@@ -115,29 +95,45 @@ const Sidebar = ({ events = [] }) => {
   };
 
   // 약속 목록 상태
-  const appointments = events.map((e, idx) => ({
-    id: idx + 1,
-    text: e.title,
-    date: e.start.slice(0, 10),
-  }));
+  const todayStr = today.toISOString().slice(0, 10);
+  const appointments = events
+    .map((e, idx) => ({
+      id: idx + 1,
+      text: e.title,
+      date: e.start.slice(0, 10),
+    }))
+    .filter((app) => {
+      const appDate = new Date(app.date);
+      return (
+        appDate.getFullYear() === currentYear &&
+        appDate.getMonth() === currentMonth
+      );
+    })
+    .sort((a, b) => {
+      if (a.date < todayStr && b.date >= todayStr) return 1;
+      if (a.date >= todayStr && b.date < todayStr) return -1;
+      return a.date.localeCompare(b.date);
+    });
 
   return (
     <>
-      {isOpen && (
-        <div className="sidebar-overlay" onClick={() => setIsOpen(false)}></div>
-      )}
-
-      <div ref={sidebarRef} className={`sidebar ${isOpen ? "open" : "closed"}`}>
-        <div className="logo">
-          <LogoIcon />
-        </div>
-
-        <div className="logo">
-          <LogoIcon />
+      <div
+        ref={sidebarRef}
+        className={`sidebarLeft ${isOpen ? "open" : "closed"}`}
+      >
+        <div
+          className={`sidebarLeftLogo ${isOpen ? "open" : ""}`}
+          onMouseEnter={() => !isOpen && setIsLogoHovered(true)}
+          onMouseLeave={() => setIsLogoHovered(false)}
+        >
+          <button className="sidebarButton" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <CloseButton /> : <OpenButton />}
+          </button>
+          <LogoIcon className="logoIcon" />
         </div>
 
         {/* 새로운 약속 생성 버튼 */}
-        <button className="newButton" onClick={() => navigate("/new")}>
+        <button className="newButton" onClick={() => navigate("/create")}>
           {isOpen ? (
             <div className="buttonIcon">
               <NewButton />
@@ -151,28 +147,12 @@ const Sidebar = ({ events = [] }) => {
         </button>
 
         <div className="iconRow">
-          <button className="iconButton" onClick={() => navigate("/calendar")}>
-            {location.pathname === "/calendar" ? (
-              <CalendarIconSelected />
-            ) : (
-              <CalendarIcon />
-            )}
+          <button className="iconButton" onClick={() => navigate("/home")}>
+            {location.pathname === "/home" ? <CalendarIconSelected /> : <CalendarIcon />}
             <span className="iconText">약속 달력</span>
           </button>
-          <button className="iconButton" onClick={() => navigate("/mycalendar")}>
-            {location.pathname === "/calendar" ? (
-              <MyCalendarIconSelected />
-            ) : (
-              <MyCalendarIcon />
-            )}
-            <span className="iconText">나의 달력</span>
-          </button>
           <button className="iconButton" onClick={() => navigate("/list")}>
-            {location.pathname === "/calendar" ? (
-              <ListIconSelected />
-            ) : (
-              <ListIcon />
-            )}
+            {location.pathname === "/calendar" ? <ListIconSelected /> : <ListIcon /> }
             <span className="iconText">약속 목록</span>
           </button>
         </div>
@@ -210,7 +190,9 @@ const Sidebar = ({ events = [] }) => {
           <div className="appointmentsBox">
             <ul>
               {appointments.map((app) => (
-                <li key={app.id} className="appointmentItem">
+                <li key={app.id}
+                  className={`appointmentItem ${app.date < todayStr ? "past" : "future"}`}>
+                  <ListDot />
                   <span className="appointmentText">{app.text}</span>
                 </li>
               ))}
@@ -227,4 +209,4 @@ const Sidebar = ({ events = [] }) => {
   );
 };
 
-export default Sidebar;
+export default SidebarLeft;

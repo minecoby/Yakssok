@@ -1,5 +1,10 @@
+button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 /* --- 사이드바 컨테이너 --- */
-.sidebar {
+.sidebarLeft {
   position: relative;
   top: 0px;
   left: 0px;
@@ -11,24 +16,63 @@
 }
 
 /* 열었을 때 */
-.sidebar.open {
+.sidebarLeft.open {
   width: 360px;
   padding: 30px;
 }
 
 /* 닫았을 때 */
-.sidebar.closed {
+.sidebarLeft.closed {
   width: 120px;
   padding: 30px;
 }
 
-/* --- 로고 및 프로필 --- */
-.logo {
+/* --- 로고, 버튼, 프로필 --- */
+.sidebarLeftLogo {
   position: absolute;
   top: 38px;
   left: 33px;
   width: 56px;
   height: 55px;
+  border: None;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebarButton {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebarLeftLogo:not(.open):hover .logoIcon {
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebarLeftLogo:not(.open):hover .sidebarButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 열린 상태에서 버튼 보이는 위치 */
+.sidebarLeftLogo.open .sidebarButton {
+  opacity: 1;
+  pointer-events: auto;
+
+  /* 열린 위치 */
+  top: 0px;
+  left: 250px; /* ← 이 값만 조정하면 sidebar 열렸을 때 위치 바뀜 */
 }
 
 .profile {
@@ -47,20 +91,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-/* --- 사이드바 버튼 --- */
-.toggle {
-  position: absolute;
-  width: 55px;
-  height: 55px;
-  top: 38px;
-  left: 95px;
-  background: none;
-  font-size: 15px;
-  cursor: pointer;
-  color: #1f1f1f;
-  border: None;
 }
 
 /* --- 새로운 약속 만들기 버튼 --- */
@@ -82,7 +112,7 @@
   align-items: center;
 }
 
-.sidebar.closed .newButton {
+.sidebarLeft.closed .newButton {
   background-color: transparent;
   width: 60px;
 }
@@ -112,20 +142,22 @@
   flex-grow: 1;
 }
 
-.sidebar.closed .buttonText {
+.sidebarLeft.closed .buttonText {
   display: none;
 }
 
 /* --- 닫았을 때 아이콘 모음 --- */
-.sidebar.open .iconRow {
+.sidebarLeft.open .iconRow {
   display: none;
 }
 
 .iconRow {
-  margin: 135px 0px 0px 0px;
+  margin: 0px 0px 108px 0px;
   gap: 52px;
   display: flex;
+  flex-grow: 1;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
 }
 
@@ -149,7 +181,7 @@
   font-style: normal;
   font-weight: 500;
   font-size: 10px;
-  color: #85837B;
+  color: #85837b;
   order: 1;
   flex-grow: 1;
   white-space: nowrap;
@@ -242,7 +274,7 @@
   border-radius: 4px;
 }
 
-.sidebar.closed .calendar {
+.sidebarLeft.closed .calendar {
   display: none;
 }
 
@@ -264,6 +296,18 @@
   overflow-y: auto;
 }
 
+.appointmentsBox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.appointmentsBox::-webkit-scrollbar-thumb {
+  background-image: url("data:image/svg+xml,%3Csvg width='3' height='63' viewBox='0 0 3 63' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='1.25' y1='1.25' x2='1.25' y2='61.75' stroke='%23C4C5B7' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border-radius: 10px;
+}
+
 /* 기본 스타일 초기화 */
 .appointments ul {
   list-style: none;
@@ -273,14 +317,23 @@
 
 .appointmentItem {
   padding: 5px 0;
+  display: flex;
+  align-items: center;
+}
+
+.appointmentItem.past {
+  color: #c1c4ba;
+}
+
+.appointmentItem.future {
+  color: #8aa24b;
 }
 
 .appointmentText {
   font-size: 13px;
   font-weight: 500;
-  color: #8aa24b;
 }
 
-.sidebar.closed .appointments {
+.sidebarLeft.closed .appointments {
   display: none;
 }

@@ -2,6 +2,8 @@ import React from "react";
 import "./SidebarRight.css";
 import closeButton from "../assets/closeButton.svg";
 import logo from "../assets/titleIcon.svg";
+import CalendarStatic from "./CalendarStatic";
+import ClockStatic from "./ClockStatic";
 
 const SidebarRight = ({ open, onClose, children }) => {
   if (!open) return null;
@@ -20,7 +22,11 @@ const SidebarRight = ({ open, onClose, children }) => {
             <span className="title-text">앱티브 팀플 회의</span>
         </div>
 
-        <div className="temp-space"></div>
+        <div className="content-area">
+          <CalendarStatic date={new Date(2025, 8, 8, 20, 30)} />
+          <br/>
+          <ClockStatic time={new Date(2025, 8, 8, 20, 30)} />
+        </div>
 
         <div className="info">
             <span className="info-text">9월 8일</span>

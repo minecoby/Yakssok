@@ -6,11 +6,23 @@
   overflow: hidden;
 }
 
-/* 사이드바 너비만큼 오른쪽 공간 자동 계산 */
+.sidebar-left {
+  width: 80px;
+  height: 100%;
+  background-color: #f8f9f3;
+  transition: width 0.3s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-left.open {
+  width: 260px;
+}
+
 .main-content {
   flex: 1;
   background: #FAFFF2;
   border-radius: 15px 0 0 15px;
   padding: 24px;
   overflow-y: auto;
+  transition: all 0.3s ease;
 }

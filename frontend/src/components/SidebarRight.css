@@ -55,6 +55,7 @@
     margin-top: 91px;
     margin-left: 45px;
     margin-right: 45px;
+    margin-bottom: 60px;
     background: #1F1F1F;
     color: #FFFFFF;
 }
@@ -80,6 +81,10 @@
     height: 500px;
 }
 
+.info {
+  margin-top: 60px;
+}
+
 .info-text {
   font-family: 'Pretendard', sans-serif;
   font-weight: 500;
@@ -94,3 +99,86 @@
   color: #C4C5B7;
   margin: 35px;
 }
+
+/* 달력 */
+.cal {
+  margin: 8px auto 24px;
+  width: 320px;
+  font-family: 'Pretendard', sans-serif;
+  color: #333;
+}
+
+.cal-header {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.cal-dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 6px;
+  opacity: 0.5;
+  font-size: 12px;
+}
+
+.cal-dow-cell { text-align: center; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.cal-cell {
+  height: 38px;
+  border-radius: 10px;
+  text-align: center;
+  line-height: 38px;
+  font-size: 14px;
+  color: #222;
+}
+
+.cal-cell.is-empty { opacity: 0.15; }
+
+.cal-cell.is-selected {
+  background: #1F1F1F;
+  color: #fff;
+}
+
+/* 시계 */
+.clock {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 16px auto 0;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.clock-number {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  user-select: none;
+  opacity: 0.9;
+}
+
+.clock-center {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 6px; height: 6px;
+  background: #222; border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.clock-hand {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform-origin: 50% 100%;
+  background: #222;
+  border-radius: 2px;
+}
+
+.clock-hand.hour   { width: 3px; height: 60px; }
+.clock-hand.minute { width: 2px; height: 85px; }

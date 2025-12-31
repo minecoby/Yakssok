@@ -98,7 +98,6 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   display: flex;
   justify-content: center;
   align-items: center;
-  text-orientation: sideways;
   white-space: nowrap;
 }
 
@@ -120,16 +119,12 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   border-spacing: 0 30px;
 }
 
-.fc-daygrid-body-unstacked .fc-daygrid-day-frame {
-  margin: 0;
-}
-
 /* 월간 캘린더 셀 스타일 */
 .fc-daygrid-day-frame {
   position: relative;
   padding: 10px;
   height: 104px;  
-  width: 130px;  
+  width: 160px;  
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -139,44 +134,11 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   background-color: #FAFFF2; 
 }
 
-/* 날짜 셀 내 약속 이름 */
-.fc-daygrid-day-frame .event-item {
-  position: absolute; 
-  left: 10px; 
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 16px;
-  color: white; 
-  margin-bottom: 5px; 
-  display: block; 
-  max-height: 20px; 
-}
-
-/* 최대 2개까지만 표시 */
-.fc-daygrid-day-frame .event-item:nth-child(n+3) {
-  display: none;
-}
-
-/* 날짜 셀 래퍼 (테두리, 패딩) */
-.custom-day-cell-wrapper {
-  padding: 13px 16px;
-  border-radius: 5px;
-  width: 155px;
-  height: 104px;
-}
-
-/* 날짜 번호 및 컨테이너 스타일 */
-.custom-day-cell {
-  height: 100%;
-  width: 100%;
-}
-
+/* 날짜 번호 */
 .date-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0;
   gap: 17px;
 }
 
@@ -193,50 +155,31 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   color: #BEBEBE;
 }
 
+/* 월간 캘린더 헤더 */
+.fc-col-header-cell {
+  height: 80px; 
+}
+
+.fc-col-header-cell .monthly-header-dayname {
+  font-size: 16px;  
+  line-height: 60px;  
+}
+
+/* 월간 캘린더 그리드 */
+.fc-daygrid-body-unbalanced td {
+  border-bottom: 0.5px solid #C4C5B7; 
+}
+.fc-daygrid-body-unbalanced tr:last-child td {
+  border-bottom: none; 
+}
 
 /* ---------------------------------------------------- /
 / 약속(이벤트) 스타일 /
 / ---------------------------------------------------- */
-/* 이벤트 - 셀 전체 차지 */
-.fc-daygrid-event {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 12px;
-  display: flex !important;
-  flex-direction: column;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  white-space: normal !important;
-  overflow: hidden;
-  background: inherit !important; /* 색상 클래스(color-point) 사용 */
-}
-
-.fc-daygrid-event-harness {
-  position: relative !important; 
-  inset: 0;              
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 12px;
-}
-
-.fc-event-main-frame {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  width: 100% !important;
-  /*height: 100% !important;*/
-}
-
 .fc-event {
   border: none !important;
-  background: inherit !important; 
-  height: 100% !important;
-  width: 100% !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  background: inherit !important; 
   border-radius: 12px;
+  overflow: hidden;
 }
 
 /* 공통 이벤트 스타일 */
@@ -255,29 +198,23 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   overflow-wrap: break-word;
 }
 
-/* 이벤트 내용*/
+/* 이벤트 내용 */
 .custom-event-content {
-  display: -webkit-box;
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  overflow: hidden;
   text-align: left;
-  height: auto;
-  gap: 2px;
+  gap: 4px;
   width: 100%;
-  -webkit-line-clamp: 2;   /* 최대 2줄까지만 */
-  -webkit-box-orient: vertical;
+  height: 100%;
+  padding: 10px;
 }
 
 .event-title {
   width: 100%;
-  height: 20px;
   font-weight: 500;
   font-size: 13px;
-  line-height: 20px;
   color: #FFFFFF;
-  text-align: left;
 }
 
 .event-time-container {
@@ -286,192 +223,38 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   align-items: center;
   gap: 8px;
   width: 100%;
-  height: 20px;
+  margin-top: auto !important;
 }
 
-.event-time-start, .event-time-end {
+.event-time-start {
   font-weight: 500;
   font-size: 13px;
-  line-height: 20px;
   color: #FFFFFF;
 }
 
-.event-box {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0; 
-  background: #BBCEA0;
-  border-radius: 12px;
-  padding: 6px 8px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.event-item {
-  font-size: 13px;
-  line-height: 18px;
-  text-align: left;
-}
-
-/* 지난 일정 */
+/* 과거/오늘/미래 이벤트 색상 */
 .past-event {
   background: #EAEEE0; 
   color: #C4C5B7 !important;
 }
 
-/* 오늘 일정 */
 .today-event {
   background: #F9CBAA;
   color: #FFFFFF !important;
 }
 
-/* 미래 일정 */
 .future-event {
   background: #BBCEA0; 
+  color: #FFFFFF !important;
 }
 
-/* 약속 이름 색상 변경 */
-.past-event .event-item {
-  color: #C4C5B7 !important; /* 과거 일정 약속 이름 글자색 */
-}
-
-.today-event .event-item {
-  color: #FFFFFF !important; 
-}
-
-.future-event .event-item {
-  color: #FFFFFF !important; 
-}
-
-/* 날짜 번호 색상 변경 필요*/
-
-
-/* 오늘 표현 여기서는 제거 */
-.fc .fc-daygrid-day.fc-day-today {
-  background-color: transparent !important; 
-  --fc-today-bg-color: transparent !important;  
-  box-shadow: none !important; 
-}
-:root {
-  --fc-today-bg-color: transparent !important; 
-}
+.past-event .event-title, .past-event .event-time-start { color: #C4C5B7 !important; }
+.today-event .event-title, .today-event .event-time-start { color: #FFFFFF !important; }
+.future-event .event-title, .future-event .event-time-start { color: #FFFFFF !important; }
 
 /* ---------------------------------------------------- /
-/ 주간 캘린더 약속(이벤트) 스타일 /
+/ 월간 캘린더 요일 스타일 /
 / ---------------------------------------------------- */
-/* 주간 캘린더 이벤트 박스 */
-.fc-timegrid-event-harness {
-  position: absolute;
-  width: 100px;  
-  border-radius: 12px;
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  background: #BBCEA0;
-  color: white;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-/* 이벤트 항목 스타일 */
-.fc-timegrid-event .event-item {
-  position: absolute;
-  left: 10px;
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 18px;
-  color: white;
-  max-height: 60px;
-  display: block;
-}
-
-/* 이벤트 항목 위치 조정 (index에 따라) */
-.fc-timegrid-slot-lane {
-  display: flex;  
-  justify-content: center;
-  align-items: center;
-  position: relative;  
-}
-
-.fc-timegrid-slot-lane .event-item:nth-child(1) {
-  top: 5px; /* 첫 번째 이벤트 위치 */
-}
-.fc-timegrid-slot-lane .event-item:nth-child(2) {
-  top: 30px; 
-}
-.fc-timegrid-slot-lane .event-item:nth-child(3) {
-  top: 55px; 
-}
-
-.fc-event-main {
-  display: flex;  
-  min-width: 100px; 
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-/* 월간 캘린더에서 'fc-daygrid-event-harness' 숨기기 */
-.fc-daygrid-view .fc-daygrid-day-events .fc-daygrid-event-harness {
-  display: none !important;
-}
-/* 주간 캘린더에서 'fc-timegrid-event-harness' 표시 */
-.fc-timegrid-view .fc-timegrid-event-harness {
-  display: block !important;
-}
-
-/* 약속 제목은 상단에, 시간은 하단에 배치 */
-.fc-event-main-frame {
-  display: flex;
-  flex-direction: column; 
-  justify-content: space-between;
-  height: 100%;
-}
-
-/* 약속 제목 */
-.fc-event-title-container {
-  order: -1; /* 제목을 상단으로 */
-  margin-bottom: 5px; 
-  font-size: 12px;
-  padding: 15px;
-}
-
-/* 약속 시간 */
-.fc-event-time {
-  order: 1; /* 시간은 하단으로 */
-  font-size: 12px;
-  padding: 15px;
-}
-
-/* ---------------------------------------------------- /
-/ 월간 캘린더 그리드 선 스타일 /
-/ ---------------------------------------------------- */
-.fc-daygrid-week {
-  margin-bottom: 30px;
-  position: relative;
-}
-
-.fc-daygrid-week:last-child {
-  margin-bottom: 0;
-}
-
-.fc-daygrid-week::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: 0;
-  width: 100%;
-  height: 0.3px;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.fc-daygrid-week:last-child::after { display: none; }
-
 .fc-daygrid-view .fc-col-header-cell-cushion { display: none; }
 
 .fc-daygrid-view .fc-col-header-cell {
@@ -490,22 +273,22 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   color: #85837B;
 }
 
-.fc-day-mon .monthly-header-dayname,
-.fc-day-tue .monthly-header-dayname,
-.fc-day-wed .monthly-header-dayname,
-.fc-day-thu .monthly-header-dayname,
-.fc-day-fri .monthly-header-dayname {
-  color: #85837B;
-}
 .fc-day-sun .monthly-header-dayname {
   color: #EEB1B1;
 }
+
 .fc-day-sat .monthly-header-dayname {
   color: #74ABB4;
 }
-/* 오늘 날짜의 요일 색상은 #F9CBAA로 변경 필요 */
+
+/* 오늘 날짜의 요일 색상 */
 .fc-daygrid-day-frame.fc-day-today .monthly-header-dayname {
   color: #F9CBAA !important; 
+}
+
+.fc-daygrid-day-number,
+.date-number {
+  color: #1F1F1F !important;
 }
 
 /* ---------------------------------------------------- /
@@ -530,7 +313,6 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 }
 
 .weekly-header-dayname {
-  font-family: 'Pretendard', sans-serif;
   font-weight: 500;
   font-size: 13px;
   line-height: 20px;
@@ -558,12 +340,6 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   color: #74ABB4 !important;
 }
 
-.fc table {
-  border-collapse: separate;
-}
-
-
-
 /* ---------------------------------------------------- /
 / 주간 캘린더 바디 영역 스크롤 /
 / ---------------------------------------------------- */
@@ -582,14 +358,14 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   z-index: 10;
 }
 
-/* 시간 영역만 스크롤 */
+/* 시간 영역 스크롤 */
 .fc-timegrid-body {
   flex: 1;
   overflow-y: auto;
   height: 80vh; 
 }
 
-/* FullCalendar 스크롤바 스타일 */
+/* 스크롤바 스타일 */
 .fc-timegrid-body::-webkit-scrollbar {
   width: 10px;
 }
@@ -599,60 +375,129 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   border-radius: 8px;
 }
 
-/* 시간 슬롯 간격 */
+/* 시간 슬롯 */
 .fc-timegrid-slots .fc-timegrid-slot-lane {
   height: 120px;
-  border-bottom: 0.3px solid rgba(0, 0, 0, 0.5);
+  border-bottom: 0.5px solid #C4C5B7;
 }
 
-.fc-timegrid-slot-label { top: 5px; }
-
-.fc-timegrid-slot-lane:last-of-type { border-bottom: none; }
-
-.fc-timegrid-slot-label-cushion { position: relative; font-size: 15px; font-weight: 500; }
-
-.fc-timegrid-slot-label-cushion::after { content: ''; }
+.fc-timegrid-slot-label-cushion {
+  font-size: 15px;
+  font-weight: 500;
+}
 
 /* All-day 슬롯 숨기기 */
 .fc-timegrid-all-day, .fc-timegrid-all-day-head { display: none; }
 
 /* ---------------------------------------------------- /
-/ 주간 캘린더 그리드 선 스타일 /
+/ 주간 캘린더 이벤트 위치 및 구조 /
 / ---------------------------------------------------- */
-
-/* 시간 슬롯에 수평선 추가 */
-.fc-timegrid-slot-lane:last-of-type {
-  border-top: 0.5px solid #948979;  /* 중앙에 수평선 */
-  border-bottom: 0.5px solid #948979; /* 중앙에 수평선 */
+.fc-timegrid-event-harness {
+  position: absolute;
+  border-radius: 12px;
+  background: transparent !important; 
+  color: white;
+  box-sizing: border-box;
+  z-index: 1;
+  margin-left: 17px !important;
+  margin-right: 17px !important;
+  border: none !important;
 }
 
-/* 마지막 슬롯에서 수평선 제거 */
-.fc-timegrid-slot:last-child {
-  border-bottom: none;
+.fc-event-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6px;
 }
 
-/* 시간 슬롯 높이 및 기타 설정 */
-.fc-timegrid-slot-lane {
-  height: 120px; /* 슬롯의 높이 */
-  border-bottom: 0.5px solid #948979; /* 수평선 색상 */
+.fc-event-title-container {
+  font-size: 13px;
+  font-weight: 500;
+  padding-bottom: 4px;
+}
+
+.fc-event-time {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+
+/* ---------------------------------------------------- /
+/ 기타 공통 설정 /
+/ ---------------------------------------------------- */
+.fc table {
+  border-collapse: separate;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: transparent !important; 
+  box-shadow: none !important; 
+}
+:root {
+  --fc-today-bg-color: transparent !important;
+  --fc-event-bg-color: transparent !important;
+  --fc-event-border-color: transparent !important; 
+}
+
+/* ---------------------------------------------------- */
+/* 이벤트 박스(Figma Today Box 스타일 적용) */
+/* ---------------------------------------------------- */
+.calendar-day-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 13px 12px;
+  gap: 10px;
+
+  width: 115px;
+  height: 80px;  /* 임시 고정 높이 */
+
+  background: #F9CBAA; /* JS에서 override */
+  box-shadow: 0px 3px 3px rgba(62, 62, 62, 0.05);
+  border-radius: 15px;
+
+  color: #FFFFFF;
+  overflow: hidden;
+}
+
+/* 날짜 숫자 */
+.calendar-date-num {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 22px;
+
+  color: #FFFFFF;
+}
+
+/* 이벤트 정보 Wrapping */
+.calendar-event-title {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 20px;
+
+  color: inherit !important;
+  margin-top: 5px;
+
+  white-space: normal; 
+
+  
+}
+
+/* 시간(있을 경우) */
+.calendar-event-time {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 20px;
+
+  color: inherit !important;
 }
 
 
 
 
-
-
-
-
-/*
-fc 라이브러리 계층구조
-fc-timegrid
-├── fc-timegrid-header  ← 요일/날짜 헤더 (고정)
-└── fc-scroller         ← 시간 영역 (스크롤 가능)
-    └── fc-timegrid-body
-        └── fc-timegrid-cols  ← 시간 슬롯과 이벤트
-*/
-
-/*
-EAEEE0
-*/

@@ -1,0 +1,146 @@
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 200;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+.create-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: #F6FAED;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  background: #FAFFF2;
+  border-radius: 15px 0 0 15px;
+  padding: 0px;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.logoImage {
+    width: 70px;
+    height: 70px;
+    margin-top: 153px;
+    margin-bottom: 61px;
+}
+
+.request-text {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 30px;
+    font-weight: 200;
+    margin-bottom: 70px;
+}
+
+.input-index {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #8b8b8b;
+    margin-bottom: 27px;
+    margin-right: 550px;
+}
+
+.title-input {
+    width: 659px;
+    height: 59px;
+    padding: 24px 30px;
+    margin-top: 8px;
+
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1f1f1f;
+
+    background-color: #FAFFF2;
+    border: 0.3px solid #1f1f1f;
+    border-radius: 15px;
+    outline: none;
+
+    box-sizing: border-box;
+
+    margin-bottom: 486px;
+}
+
+.number-input {
+    margin-top: 125px;
+    margin-bottom: 486px;
+}
+
+.number-box {
+    width: 63px;
+    height: 74px;
+    border-radius: 10px;
+    background: #EAEEE0;
+    border: none;
+
+    margin-left: 29px;
+    margin-right: 15px;
+
+    font-family: 'Pretendard', sans-serif;
+    font-size: 30px;
+    font-weight: 500;
+
+    text-align: center;
+
+    outline: none;
+}
+
+.number-box::-webkit-inner-spin-button,
+.number-box::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.num-index-1 {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #85837B; 
+}
+
+.num-index-2 {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 25px;
+    font-weight: 300;
+    color: #1F1F1F; 
+}
+
+.submit-button {
+  width: 342px;
+  height: 60px;
+  border: none;
+  border-radius: 15px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 0px;
+  margin-bottom: 150px;
+
+  background: #1F1F1F;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.submit-button:disabled {
+  background: #EAEEE0;
+  color: #85837B;
+  cursor: not-allowed;
+}

@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse, urlunparse
 
-
 load_dotenv()
 
 _ALLOWED_FRONTEND_SCHEMES = {"http", "https"}

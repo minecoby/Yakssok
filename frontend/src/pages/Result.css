@@ -1,0 +1,179 @@
+/* --- 페이지 레이아웃 --- */
+.resultPage {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* --- 메인 컨테이너 --- */
+.resultContainer {
+  flex: 1;
+  background-color: #fafff2;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- 약속 범위 --- */
+.rangeContainer {
+  display: flex;
+  flex-direction: column;
+  margin: 50px 0px;
+}
+
+.rangeText {
+  display: flex;
+  margin: 25px;
+  color: #85837b;
+  font-size: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.weekContainer {
+  width: 100%;
+  padding: 30px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.monthText {
+  display: flex;
+  font-size: 30px;
+  color: #292929;
+  width: 245px;
+  height: 45px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- 날짜 7개 --- */
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  column-gap: 30px;
+  flex: 1;
+}
+
+.dayCell {
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  height: 105px;
+  padding: 13px 16px;
+  border-radius: 15px;
+}
+
+.dayText {
+  font-size: 15px;
+  color: #3e3e3e;
+}
+
+.dayText.sunday {
+  color: #eeb1b1;
+}
+
+.dayText.saturday {
+  color: #74abb4;
+}
+
+.dayCell.selected {
+  background-color: #bbcea0;
+}
+
+.dayCell.selected .dayText {
+  color: #ffffff;
+}
+
+/* --- 추가 설정 --- */
+.addSetting {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 100px 0px;
+}
+
+.setText {
+  font-size: 25px;
+  color: #85837b;
+  margin: 45px;
+  text-align: center;
+}
+
+.setInput {
+  background-color: #e9ede2;
+  color: #292929;
+  width: 50px;
+  height: 60px;
+  padding: 10px 20px;
+  margin: 20px;
+  border: none;
+  border-radius: 15px;
+  font-size: 30px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* --- 추천 날짜 --- */
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 100px 0px;
+}
+
+.noticeText {
+  font-size: 35px;
+  color: #292929;
+  margin: 45px;
+  text-align: center;
+}
+
+/* --- 추천 날짜 목록 --- */
+.resultList {
+  display: flex;
+  flex-direction: column;
+  gap: 45px;
+  align-items: center;
+}
+
+.resultCard {
+  width: 600px;
+  padding: 10px 30px;
+  border-radius: 20px;
+  background: #e9ede2;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+}
+
+.resultNum {
+  width: 25px;
+  height: 25px;
+  border-radius: 8px;
+  background: #292929;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.resultText {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+
+  font-size: 30px;
+  color: #292929;
+}
+
+.resultDate {
+  width: 250px;
+  font-weight: 500;
+}

@@ -1,0 +1,74 @@
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: #FAFFF2;
+  overflow: hidden;
+  align-items: center;
+  text-align: center;
+  padding: 150px 0px;
+}
+
+.logoImage {
+    width: 172px;
+    height: 172px;
+    margin-bottom: 120px;
+}
+
+.text {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 75px;
+    font-weight: 100;
+}
+
+.text-bold {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 75px;
+    font-weight: 300;
+}
+
+.login-button {
+    background-color: #1F1F1F;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #F6F6F6;
+    margin-top: 100px;
+    margin-bottom: 20px;
+    padding: 12px 69px;
+    border-radius: 10px;
+}
+
+.googleLogo {
+    vertical-align: middle;
+    margin-right: 15px;
+    width: 24px;
+    height: 24px;
+}
+
+.login-text {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #C4C5B7;
+}

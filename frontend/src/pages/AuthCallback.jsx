@@ -5,13 +5,17 @@ const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("callback url:", window.location.href);
+    
     const params = new URLSearchParams(window.location.search);
     const token = params.get("access_token");
 
     if (token) {
       localStorage.setItem("access_token", token);
 
-      navigate("/home");
+      //navigate("/home", { replace: true });
+      // OAuth 콜백에서는 window.location 사용
+      window.location.replace("/home");
     } else {
       navigate("/");
     }

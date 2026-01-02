@@ -1,13 +1,113 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { API_BASE_URL } from '../config/api';
 import './Calendar.css';
 
-const Calendar = ({ events }) => {
+const Calendar = ({ events: initialEvents = [] }) => {
   const calendarRef = useRef(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeView, setActiveView] = useState('dayGridMonth');
+  const [dateRange, setDateRange] = useState(null);
+  const [events, setEvents] = useState(initialEvents);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [reauthUrl, setReauthUrl] = useState(null);
+
+  const normalizeEvents = useCallback(
+    (items = []) =>
+      items
+        .map((item) => {
+          const start = item?.start?.dateTime || item?.start?.date;
+          const end = item?.end?.dateTime || item?.end?.date;
+
+          if (!start) return null;
+
+          return {
+            id: item.id || `${start}-${item.summary}`,
+            title: item.summary || '제목 없음',
+            start,
+            end,
+            allDay: Boolean(item?.start?.date),
+          };
+        })
+        .filter(Boolean),
+    []
+  );
+
+  // JWT 사용하여 구글 캘린더 API 호출
+  const fetchCalendarEvents = useCallback(
+    async ({ start, end }) => {
+      const token = localStorage.getItem('access_token');
+
+      if (!token) {
+        setError('로그인이 필요합니다.');
+        return;
+      }
+
+      if (!start || !end) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+      setReauthUrl(null);
+
+      try {
+        const aggregateEvents = [];
+        let pageToken = null;
+
+        // 페이징 처리하며 여러 번 API 호출
+        do {
+          const params = new URLSearchParams({
+            time_min: start.toISOString(),
+            time_max: end.toISOString(),
+            max_results: '50',
+          });
+
+          if (pageToken) {
+            params.set('page_token', pageToken);
+          }
+
+          // 실제 API 호출, JWT 인증 요청
+          const response = await fetch(
+            `${API_BASE_URL}/calendar/events?${params.toString()}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            const message = data?.detail || '캘린더를 불러오지 못했습니다.';
+            setError(message);
+            if (data?.reauthUrl) {
+              setReauthUrl(data.reauthUrl);
+            }
+            return;
+          }
+
+          if (Array.isArray(data?.events)) {
+            aggregateEvents.push(...data.events);
+          }
+          pageToken = data?.nextPageToken || null;
+        } while (pageToken);
+
+        // JWT 인증 성공 시 받은 데이터 화면에 반영
+        setEvents(normalizeEvents(aggregateEvents));
+        setReauthUrl(null);
+      } catch {
+        setError('캘린더를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [normalizeEvents]
+  );
 
   // 초기화: 오늘 날짜로 이동
   useEffect(() => {
@@ -17,6 +117,12 @@ const Calendar = ({ events }) => {
       setCurrentDate(calendarApi.getDate());
     }
   }, []);
+
+  useEffect(() => {
+    if (dateRange) {
+      fetchCalendarEvents(dateRange);
+    }
+  }, [dateRange, fetchCalendarEvents]);
 
   // 월/년도 표시 포맷팅
   const formatMonthAndYear = (date) => {
@@ -82,7 +188,6 @@ const Calendar = ({ events }) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // CSS 클래스 결정 (CSS 파일에 정의된 클래스 사용)
       let statusClass = "future-event";
       if (eventDate.getTime() === today.getTime()) {
         statusClass = "today-event";
@@ -137,6 +242,23 @@ const Calendar = ({ events }) => {
           </div>
         </div>
 
+        {error && (
+          <div className="calendar-error">
+            <span>{error}</span>
+            {reauthUrl && (
+              <button
+                type="button"
+                className="reauth-button"
+                onClick={() => (window.location.href = reauthUrl)}
+              >
+                다시 인증하기
+              </button>
+            )}
+          </div>
+        )}
+
+        {isLoading && <div className="calendar-loading">구글 캘린더를 불러오는 중입니다...</div>}
+
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin]}
@@ -147,6 +269,7 @@ const Calendar = ({ events }) => {
           datesSet={(info) => {
             setActiveView(info.view.type);
             setCurrentDate(info.view.currentStart);
+            setDateRange({ start: info.view.currentStart, end: info.view.currentEnd });
           }}
           dayHeaderContent={getDayHeaderContent}
           eventContent={renderEventContent}

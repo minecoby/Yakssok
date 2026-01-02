@@ -9,14 +9,15 @@ import { API_BASE_URL } from "../config/api";
 const Login = () => {
     const navigate = useNavigate();
 
-    const navigateToHome = () => {
-    navigate("/home");
-    };
+    // 이제 AuthCallback.jsx에서 처리하므로 주석 처리
+    // const navigateToHome = () => {
+    // navigate("/home");
+    // };
 
     useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-        navigateToHome(); 
+        navigate("/home", { replace: true });
         }
     }, [navigate]);
 

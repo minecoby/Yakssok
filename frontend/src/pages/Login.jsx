@@ -14,12 +14,12 @@ const Login = () => {
     // navigate("/home");
     // };
 
-    useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-        navigate("/home", { replace: true });
-        }
-    }, [navigate]);
+    // useEffect(() => {
+    // const token = localStorage.getItem("access_token");
+    // if (token) {
+    //     navigate("/home", { replace: true });
+    //     }
+    // }, [navigate]);
 
     const handleGoogleLogin = async () => {
         try {

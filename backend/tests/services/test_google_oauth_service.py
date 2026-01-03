@@ -52,7 +52,7 @@ def test_generate_auth_url_contains_parameters(load_google_service):
     assert query["client_id"] == ["client"]
     assert query["redirect_uri"] == ["http://localhost/callback"]
     assert query["scope"] == [
-        "openid email profile https://www.googleapis.com/auth/calendar.events.readonly"
+        "openid email profile https://www.googleapis.com/auth/calendar.events"
     ]
     assert query["access_type"] == ["offline"]
     assert query["include_granted_scopes"] == ["true"]

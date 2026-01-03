@@ -15,7 +15,7 @@ class GoogleOAuthService:
         # Google OAuth 인증 URL 생성
         scope = (
             "openid email profile "
-            "https://www.googleapis.com/auth/calendar.events.readonly"
+            "https://www.googleapis.com/auth/calendar.events"
         )
         params = {
             "client_id": GOOGLE_CLIENT_ID,

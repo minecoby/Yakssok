@@ -65,7 +65,7 @@ def test_google_login_returns_composed_url(oauth_modules):
     assert query["client_id"] == ["client"]
     assert query["redirect_uri"] == ["http://localhost/callback"]
     assert query["scope"] == [
-        "openid email profile https://www.googleapis.com/auth/calendar.events.readonly"
+        "openid email profile https://www.googleapis.com/auth/calendar.events"
     ]
     assert query["access_type"] == ["offline"]
     assert query["include_granted_scopes"] == ["true"]

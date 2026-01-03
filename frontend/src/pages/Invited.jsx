@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import LogoIconWhite from "../assets/LogoIconWhite";
 import EditIcon from "../assets/EditIcon";
@@ -82,6 +82,92 @@ const Invited = () => {
 
     fetchAppointment();
   }, [code]);
+
+  const normalizeEvents = useCallback((items = []) =>
+    items
+      .map((item) => {
+        const start = item?.start?.dateTime || item?.start?.date || item?.start;
+        const end = item?.end?.dateTime || item?.end?.date || item?.end;
+
+        if (!start) return null;
+
+        return {
+          id: item.id || `${start}-${item.summary || item.title}`,
+          title: item.summary || item.title || '제목 없음',
+          start,
+          end,
+          allDay: Boolean(item?.start?.date),
+        };
+      })
+      .filter(Boolean),
+  []);
+
+  const fetchUserEvents = useCallback(async () => {
+    if (candidateDates.length === 0) return;
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.warn('access_token이 없어 캘린더를 불러올 수 없습니다.');
+      return;
+    }
+
+    const sortedDates = [...candidateDates]
+      .map((item) => new Date(item.date))
+      .filter((d) => !isNaN(d.getTime()))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    if (sortedDates.length === 0) return;
+
+    const rangeStart = new Date(sortedDates[0]);
+    rangeStart.setHours(0, 0, 0, 0);
+    const rangeEnd = new Date(sortedDates[sortedDates.length - 1]);
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    try {
+      const aggregated = [];
+      let pageToken = null;
+
+      do {
+        const params = new URLSearchParams({
+          time_min: rangeStart.toISOString(),
+          time_max: rangeEnd.toISOString(),
+          max_results: '50',
+        });
+
+        if (pageToken) {
+          params.set('page_token', pageToken);
+        }
+
+        const response = await fetch(`${API_BASE_URL}/calendar/events?${params.toString()}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          const message = data?.detail || '캘린더를 불러오지 못했습니다.';
+          console.error(message);
+          return;
+        }
+
+        if (Array.isArray(data?.events)) {
+          aggregated.push(...data.events);
+        }
+
+        pageToken = data?.nextPageToken || null;
+      } while (pageToken);
+
+      setAllEvents(normalizeEvents(aggregated));
+    } catch (error) {
+      console.error('캘린더 불러오기 중 오류가 발생했습니다.', error);
+    }
+  }, [candidateDates, normalizeEvents]);
+
+  useEffect(() => {
+    fetchUserEvents();
+  }, [fetchUserEvents]);
 
   useEffect(() => {
     if (candidateDates.length === 0) {
@@ -268,7 +354,7 @@ const Invited = () => {
       <main className="main-content">
         <div className="date-selector-container">
           {candidateDates.length > 0 ? (
-            candidateDates.map((date, index) => {
+            candidateDates.map((candidate, index) => {
               const dayEvents = getEventsForDate(candidate.date); 
               const hasEvent = dayEvents.length > 0;
               const joinedTitles = dayEvents.map(e => e.title).join(", "); 
@@ -323,14 +409,14 @@ const Invited = () => {
                     ) : (
                       <span className="event-title">약속 없음</span>
                     )}
-                    <span className="availability-chip">
+                    {/* <span className="availability-chip">
                       {candidate.availableCount}/{candidate.totalCount} 참여
                       {candidate.availability === "all"
                         ? " - 모두 가능"
                         : candidate.availability === "partial"
                         ? " - 일부 가능"
                         : " - 미응답"}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               );

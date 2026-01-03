@@ -14,14 +14,15 @@ const Invited = () => {
   const { code } = useParams();
   const location = useLocation();
   const initialEvents = location.state ? location.state.events : [];
+  const initialEventsWithId = initialEvents.map((event, index) => ({
+    ...event,
+    id: event.id || `generated-${index}-${Date.now()}`,
+  }));
 
   // 초기 데이터 로드 (ID가 없으면 강제로 생성)
-  const [allEvents, setAllEvents] = useState(() => {
-    return initialEvents.map((event, index) => ({
-      ...event,
-      id: event.id || `generated-${index}-${Date.now()}`
-    }));
-  });
+  const [allEvents, setAllEvents] = useState(initialEventsWithId);
+  const [pendingAddEvents, setPendingAddEvents] = useState([]);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 
   const [partyName, setPartyName] = useState("");
   const [candidateDates, setCandidateDates] = useState([]);
@@ -298,25 +299,129 @@ const Invited = () => {
         alert("선택된 일정이 없습니다.");
         return;
     }
+
+    const updatedPendingAdds = pendingAddEvents.filter(
+      (event) => !selectedDeleteIds.includes(event.id)
+    );
+
+    const newPendingDeleteIds = [
+      ...pendingDeleteIds,
+      ...selectedDeleteIds.filter(
+        (id) =>
+          !pendingDeleteIds.includes(id) &&
+          pendingAddEvents.every((event) => event.id !== id)
+      ),
+    ];
+
     const updatedEvents = allEvents.filter(e => !selectedDeleteIds.includes(e.id));
     setAllEvents(updatedEvents);
+    setPendingAddEvents(updatedPendingAdds);
+    setPendingDeleteIds(newPendingDeleteIds);
     setViewMode('list');
     setSelectedDeleteIds([]);
   };
 
   const saveNewEvent = (eventData) => {
-    const newEvent = { ...eventData, id: Date.now() };
-    setAllEvents([...allEvents, newEvent]); 
+    const newEvent = { ...eventData, id: `temp-${Date.now()}` };
+    setAllEvents([...allEvents, newEvent]);
+    setPendingAddEvents([...pendingAddEvents, newEvent]);
     setViewMode('list');
   };
 
   const updateEvent = (updatedEvent) => {
-    setAllEvents(allEvents.map(event => 
-      event.id === updatedEvent.id ? updatedEvent : event
-    ));
+    const isNewlyAdded = pendingAddEvents.some((event) => event.id === updatedEvent.id);
+
+    if (isNewlyAdded) {
+      setPendingAddEvents((prev) =>
+        prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+      );
+      setAllEvents((prev) =>
+        prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+      );
+      setViewMode('list');
+      return;
+    }
+
+    const replacementEvent = { ...updatedEvent, id: `temp-${Date.now()}` };
+
+    setPendingDeleteIds((prev) =>
+      prev.includes(updatedEvent.id) ? prev : [...prev, updatedEvent.id]
+    );
+
+    setPendingAddEvents((prev) => [...prev, replacementEvent]);
+
+    setAllEvents((prev) =>
+      prev.map((event) => (event.id === updatedEvent.id ? replacementEvent : event))
+    );
     setViewMode('list');
   };
 
+  const syncWithGoogleCalendar = async () => {
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+      alert('캘린더 동기화를 위해 로그인 후 다시 시도해주세요.');
+      return;
+    }
+
+    if (pendingAddEvents.length === 0 && pendingDeleteIds.length === 0) {
+      alert('추가하거나 삭제할 일정이 없습니다.');
+      return;
+    }
+
+    try {
+      for (const deleteId of pendingDeleteIds) {
+        const res = await fetch(`${API_BASE_URL}/calendar/events/${deleteId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const message = (await res.json())?.detail || '일정 삭제에 실패했습니다.';
+          throw new Error(message);
+        }
+      }
+
+      for (const event of pendingAddEvents) {
+        const payload = {
+          summary: event.title || event.summary || '제목 없음',
+          description: event.description,
+          start: {
+            dateTime: new Date(event.start).toISOString(),
+            timeZone: 'Asia/Seoul',
+          },
+          end: {
+            dateTime: new Date(event.end || event.start).toISOString(),
+            timeZone: 'Asia/Seoul',
+          },
+        };
+
+        const res = await fetch(`${API_BASE_URL}/calendar/events`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const message = (await res.json())?.detail || '일정 추가에 실패했습니다.';
+          throw new Error(message);
+        }
+      }
+
+      await fetchUserEvents();
+      setPendingAddEvents([]);
+      setPendingDeleteIds([]);
+      alert('구글 캘린더와 동기화되었습니다.');
+    } catch (error) {
+      console.error(error);
+      alert(error.message || '캘린더 동기화 중 문제가 발생했습니다.');
+    }
+  };
 
   if (viewMode === 'create') {
     return <CreateEvent date={selectedDate} onSave={saveNewEvent} onCancel={() => setViewMode('list')} />;
@@ -477,7 +582,7 @@ const Invited = () => {
             </>
         ) : (
             <>
-                <button className="confirm-btn">확인</button>
+                <button className="confirm-btn" onClick={syncWithGoogleCalendar}>확인</button>
                 <button className="edit-btn">나의 일정 수정하기</button>
             </>
         )}

@@ -6,8 +6,7 @@ import json
 
 class AppointmentCreateRequest(BaseModel):
     name: str
-    start_date: date
-    end_date: date
+    candidate_dates: List[date]
     max_participants: int
 
 

@@ -1,17 +1,20 @@
 /* --- 페이지 레이아웃 --- */
 .resultPage {
   display: flex;
-  width: 100%;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background-color: #F5F6EF;
+  overflow: hidden;
 }
 
 /* --- 메인 컨테이너 --- */
 .resultContainer {
   flex: 1;
-  background-color: #fafff2;
+  background-color: #F5F6EF;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 /* --- 약속 범위 --- */

@@ -17,8 +17,7 @@ function App() {
         <Route path="/invited" element={<Invited />} />
         <Route path="/invite/:code" element={<Invited />} />
         <Route path="/create" element={<Create />} />
-        <Route path="/result" element={<Result />} />
-
+        <Route path="/result/:inviteCode" element={<Result />} />
       </Routes>
     </Router>
   );

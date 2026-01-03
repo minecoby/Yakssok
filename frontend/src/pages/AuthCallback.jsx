@@ -5,8 +5,6 @@ const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("callback url:", window.location.href);
-    
     const params = new URLSearchParams(window.location.search);
     const token = params.get("access_token");
 

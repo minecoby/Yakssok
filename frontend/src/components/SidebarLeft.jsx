@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useState, useRef, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./SidebarLeft.css";
 import LogoIcon from "../assets/LogoIcon";
 import OpenButton from "../assets/OpenButton";
@@ -15,16 +16,56 @@ import profileImage from "../assets/profile.jpg";
 
 const SidebarLeft = ({ events = [] }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const sidebarRef = useRef(null);
 
   // 사이드바 상태
   const [isOpen, setIsOpen] = useState(false);
-  const [setIsLogoHovered] = useState(false);
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
 
-  // 달력 상태
+  // 달력 및 약속 상태
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
+
+  const toDateStr = (start) => {
+    if (!start) return "";
+    const s =
+      typeof start === "string"
+        ? start
+        : start?.dateTime ?? start?.date ?? "";
+    return s ? String(s).slice(0, 10) : "";
+  };
+
+  const todayStr = new Date().toLocaleDateString("sv-SE");
+  const appointments = useMemo(() => {
+    return events
+      .map((e, idx) => {
+        const date = toDateStr(e.start);
+        return {
+          id: e.id ?? idx + 1,
+          text: e.title ?? e.summary ?? "(제목 없음)",
+          date,
+        };
+      })
+      .filter((app) => {
+        if (!app.date) return false;
+        const appDate = new Date(app.date);
+        return (
+          appDate.getFullYear() === currentYear &&
+          appDate.getMonth() === currentMonth
+        );
+      })
+      .sort((a, b) => {
+        if (a.date < todayStr && b.date >= todayStr) return 1;
+        if (a.date >= todayStr && b.date < todayStr) return -1;
+        return a.date.localeCompare(b.date);
+      });
+  }, [events, currentYear, currentMonth, todayStr]);
+
+  const appointmentDateSet = useMemo(() => {
+    return new Set(appointments.map((a) => a.date));
+  }, [appointments]);
 
   // 달력 렌더링
   const renderCalendar = () => {
@@ -45,7 +86,7 @@ const SidebarLeft = ({ events = [] }) => {
       )}-${String(d).padStart(2, "0")}`;
 
       // 약속이 있는 날짜인지 확인
-      const hasAppointment = appointments.some((app) => app.date === dateStr);
+      const hasAppointment = appointmentDateSet.has(dateStr);
 
       // 요일 구하기
       const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
@@ -94,27 +135,6 @@ const SidebarLeft = ({ events = [] }) => {
     setCurrentYear(today.getFullYear());
   };
 
-  // 약속 목록 상태
-  const todayStr = today.toISOString().slice(0, 10);
-  const appointments = events
-    .map((e, idx) => ({
-      id: idx + 1,
-      text: e.title,
-      date: e.start.slice(0, 10),
-    }))
-    .filter((app) => {
-      const appDate = new Date(app.date);
-      return (
-        appDate.getFullYear() === currentYear &&
-        appDate.getMonth() === currentMonth
-      );
-    })
-    .sort((a, b) => {
-      if (a.date < todayStr && b.date >= todayStr) return 1;
-      if (a.date >= todayStr && b.date < todayStr) return -1;
-      return a.date.localeCompare(b.date);
-    });
-
   return (
     <>
       <div
@@ -122,7 +142,7 @@ const SidebarLeft = ({ events = [] }) => {
         className={`sidebarLeft ${isOpen ? "open" : "closed"}`}
       >
         <div
-          className={`sidebarLeftLogo ${isOpen ? "open" : ""}`}
+          className={`sidebarLeftLogo ${isOpen ? "open" : ""} ${isLogoHovered ? "hovered" : ""}`}
           onMouseEnter={() => !isOpen && setIsLogoHovered(true)}
           onMouseLeave={() => setIsLogoHovered(false)}
         >
@@ -152,7 +172,7 @@ const SidebarLeft = ({ events = [] }) => {
             <span className="iconText">약속 달력</span>
           </button>
           <button className="iconButton" onClick={() => navigate("/list")}>
-            {location.pathname === "/calendar" ? <ListIconSelected /> : <ListIcon /> }
+            {location.pathname === "/list" ? <ListIconSelected /> : <ListIcon /> }
             <span className="iconText">약속 목록</span>
           </button>
         </div>

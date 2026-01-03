@@ -9,7 +9,7 @@ export default function LinkPopup({ open, link }) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(link);
-      //alert("링크 복사 성공");
+      alert("링크가 복사되었습니다. 함께할 친구에게 공유해주세요! ");
     } catch (e) {
       console.error("copy failed", e);
     }
@@ -38,7 +38,7 @@ export default function LinkPopup({ open, link }) {
           </button>
         </div>
 
-        <button type="button" className="lp-close-btn" onClick={() => navigate("/home")}>
+        <button type="button" className="lp-close-btn" onClick={() => navigate("/result")}>
           닫기
         </button>
       </div>

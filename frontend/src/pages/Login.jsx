@@ -14,6 +14,7 @@ const Login = () => {
     // navigate("/home");
     // };
 
+    // 로그인 시 이미 토큰이 있으면 홈으로 이동 임시 제거
     // useEffect(() => {
     // const token = localStorage.getItem("access_token");
     // if (token) {

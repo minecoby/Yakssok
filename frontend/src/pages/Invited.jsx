@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import LogoIconWhite from "../assets/LogoIconWhite";
 import EditIcon from "../assets/EditIcon";
 import CreateEvent from '../components/CreateEvent';
@@ -7,11 +7,13 @@ import UpdateEvent from '../components/UpdateEvent';
 import ExclamationIcon from '../assets/ExclamationIcon';
 import CheckCircleIcon from '../assets/CheckCircleIcon';
 import EmptyCircleIcon from '../assets/EmptyCircleIcon';
+import { API_BASE_URL } from '../config/api';
 import './Invited.css'; 
 
 const Invited = () => {
-  const location = useLocation();  
-  const initialEvents = location.state ? location.state.events : []; 
+  const { code } = useParams();
+  const location = useLocation();
+  const initialEvents = location.state ? location.state.events : [];
 
   // 초기 데이터 로드 (ID가 없으면 강제로 생성)
   const [allEvents, setAllEvents] = useState(() => {
@@ -21,14 +23,9 @@ const Invited = () => {
     }));
   });
 
-  const partyName = "앱티브 팀플 회의"; 
-
-  const partyDateRange = React.useMemo(() => ({
-    startDate: new Date(2025, 12, 1), 
-    endDate: new Date(2026, 1, 1),   
-  }), []);
-
-  const [dates, setDates] = useState([]); 
+  const [partyName, setPartyName] = useState("");
+  const [candidateDates, setCandidateDates] = useState([]);
+ 
   const [filteredEvents, setFilteredEvents] = useState([]); 
   
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -43,33 +40,74 @@ const Invited = () => {
 
   const [selectedDeleteIds, setSelectedDeleteIds] = useState([]);
 
+  // 초대 링크 기반 약속 정보 불러오기
   useEffect(() => {
-    const dateArray = [];
-    let currentDate = new Date(partyDateRange.startDate);
-    while (currentDate <= partyDateRange.endDate) {
-      dateArray.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1); 
-    }
-    setDates(dateArray); 
-  }, [partyDateRange]); 
+    const fetchAppointment = async () => {
+      if (!code) return;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/appointments/${code}/detail`);
+        if (!res.ok) {
+          console.error("약속 조회 실패", res.status);
+          return;
+        }
+
+        const data = await res.json();
+        setPartyName(data.name || "");
+
+        if (data.dates && data.dates.length > 0) {
+          const parsedDates = data.dates
+            .map((item) => {
+              const parsedDate = new Date(item.date);
+              if (isNaN(parsedDate.getTime())) return null;
+
+              return {
+                date: parsedDate,
+                availability: item.availability || "none",
+                availableCount: item.available_count ?? 0,
+                totalCount: item.total_count ?? 0,
+              };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+          if (parsedDates.length > 0) {
+            setCandidateDates(parsedDates);
+          }
+        }
+      } catch (error) {
+        console.error("약속 정보를 불러오지 못했어요", error);
+      }
+    };
+
+    fetchAppointment();
+  }, [code]);
 
   useEffect(() => {
+    if (candidateDates.length === 0) {
+      setFilteredEvents([]);
+      return;
+    }
+
+    const candidateDateSet = new Set(
+      candidateDates.map((item) => {
+        const normalized = new Date(item.date);
+        normalized.setHours(0, 0, 0, 0);
+        return normalized.getTime();
+      })
+    );
+
     const filtered = allEvents.filter((event) => {
       if (!event.start) return false;
       const eventDate = new Date(event.start);
       if (isNaN(eventDate.getTime())) return false;
 
-      const start = new Date(partyDateRange.startDate);
-      const end = new Date(partyDateRange.endDate);
-
       eventDate.setHours(0, 0, 0, 0);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
 
-      return eventDate >= start && eventDate <= end;
+      return candidateDateSet.has(eventDate.getTime());
     });
     setFilteredEvents(filtered); 
-  }, [allEvents, partyDateRange]); 
+  }, [allEvents, candidateDates]); 
 
   const getEventsForDate = (date) => {
     const targetDate = new Date(date);
@@ -220,8 +258,8 @@ const Invited = () => {
         ) : (
           <>
             <div className="invitedLogo"> <LogoIconWhite /> </div>
-            <h1>{partyName}</h1>
-            <p>{partyName}에 초대되었어요</p>
+            <h1>{partyName || "약속"}</h1>
+            <p>{partyName || "약속"}에 초대되었어요</p>
             <p>약속 범위 안에서 나의 일정이예요</p>
           </>
         )}
@@ -229,16 +267,16 @@ const Invited = () => {
       
       <main className="main-content">
         <div className="date-selector-container">
-          {dates.length > 0 ? (
-            dates.map((date, index) => {
-              const dayEvents = getEventsForDate(date); 
+          {candidateDates.length > 0 ? (
+            candidateDates.map((date, index) => {
+              const dayEvents = getEventsForDate(candidate.date); 
               const hasEvent = dayEvents.length > 0;
               const joinedTitles = dayEvents.map(e => e.title).join(", "); 
 
               const isSelectedForDelete = hasEvent && allEvents.some(e => {
                   const eDate = new Date(e.start);
                   eDate.setHours(0,0,0,0);
-                  const dDate = new Date(date);
+                  const dDate = new Date(candidate.date);
                   dDate.setHours(0,0,0,0);
                   return eDate.getTime() === dDate.getTime() && selectedDeleteIds.includes(e.id);
               });
@@ -249,7 +287,7 @@ const Invited = () => {
                   className="event-box"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isDeleteMode && hasEvent) toggleDeleteSelection(date);
+                    if (isDeleteMode && hasEvent) toggleDeleteSelection(candidate.date);
                   }}
                   style={{ 
                     backgroundColor: hasEvent ? "#F9CBAA" : "#EAEEE0", 
@@ -267,13 +305,13 @@ const Invited = () => {
                   ) : (
                       <button 
                         className="edit-icon-pos" 
-                        onClick={(e) => toggleMenu(e, date)}
+                        onClick={(e) => toggleMenu(e, candidate.date)}
                       >
                         <EditIcon />
                       </button>
                   )}
 
-                  <div className="event-date">{date.getDate()}</div> 
+                  <div className="event-date">{candidate.date.getDate()}</div> 
                   
                   <div className="event-info">
                     {hasEvent ? (
@@ -285,6 +323,14 @@ const Invited = () => {
                     ) : (
                       <span className="event-title">약속 없음</span>
                     )}
+                    <span className="availability-chip">
+                      {candidate.availableCount}/{candidate.totalCount} 참여
+                      {candidate.availability === "all"
+                        ? " - 모두 가능"
+                        : candidate.availability === "partial"
+                        ? " - 일부 가능"
+                        : " - 미응답"}
+                    </span>
                   </div>
                 </div>
               );

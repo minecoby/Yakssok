@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import './Create.css';
-import { useNavigate } from "react-router-dom";
 import SidebarLeft from '../components/SidebarLeft';
 import SelectRange from '../components/SelectRange'; 
 import LinkPopup from "../components/LinkPopup";
 import logoImage from "../assets/createLogo.png";
 import { FRONT_BASE_URL } from '../config/front';
+import { API_BASE_URL } from '../config/api';
+import { useNavigate } from "react-router-dom";
 
 const Create = () => {
     const navigate = useNavigate();
 
     const sampleEvents = []; //좌측 사이드바용 샘플 데이터
+
     const [title, setTitle] = useState(""); 
     const [number, setNumber] = useState(0);
     const [selectedDates, setSelectedDates] = useState(new Set());
@@ -21,13 +23,63 @@ const Create = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [shareLink, setShareLink] = useState("");
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!isFormValid) return;
 
-        const inviteCode = `AAAAAA`; 
-        const inviteLink = `${FRONT_BASE_URL}/${inviteCode}`
-        setShareLink(inviteLink);
-        setIsPopupOpen(true);
+        const dates = [...selectedDates].sort();
+        const start_date = dates[0];
+        const end_date = dates[dates.length - 1];
+
+        const payload = {
+            name: title.trim(),
+            start_date: start_date,
+            end_date: end_date,
+            max_participants: Number(number),
+        };
+
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("로그인 정보가 없습니다. 다시 로그인해주세요. ");
+            navigate("/"); 
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/appointments/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+            });
+
+            if (res.status == 401 || res.status == 403) {
+                localStorage.removeItem("access_token");
+                alert("로그인 정보가 만료되었어요. 다시 로그인해주세요.");
+                navigate("/");
+                return;
+            }
+
+            if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            console.error("API error:", res.status, err);
+            alert(`약속 생성 실패: ${res.status}`);
+            return;
+            }
+
+            const data = await res.json();
+            const inviteCode = data.invite_link;
+            const inviteLink = `${FRONT_BASE_URL}/invite/${inviteCode}`;
+
+            setShareLink(inviteLink);
+            setIsPopupOpen(true);
+
+        } catch (e) {
+            console.error(e);
+            alert("네트워크 오류로 약속 생성에 실패했어요.");
+        }
     };
 
 
@@ -54,7 +106,7 @@ const Create = () => {
                             type="number"
                             className="number-box"
                             min="0"
-                            max="10"
+                            max="30"
                             value={number}
                             onChange={(e) => setNumber(e.target.value)}
                         />
@@ -66,15 +118,7 @@ const Create = () => {
                         type="button"
                         className="submit-button"
                         disabled={!isFormValid}
-                        onClick={() => {
-                            if (!isFormValid) return;
-                            console.log("제출 데이터:", {
-                                title,
-                                number,
-                                dates: [...selectedDates],
-                            });
-                            handleSubmit(); 
-                        }}
+                        onClick={handleSubmit}
                     >
                         {isFormValid ? "약속 만들기" : "아직 비어있는 칸이 있어요"}
                     </button>

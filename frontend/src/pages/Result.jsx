@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import SidebarLeft from "../components/SidebarLeft";
 import "./Result.css";
+import { API_BASE_URL } from "../config/api";
 
 const Result = () => {
+  const { inviteCode } = useParams();
+
   const sampleEvents = [
     {
       title: "11월 약속 1",
@@ -84,44 +88,140 @@ const Result = () => {
     },
   ];
 
-  const sampleDays = [
-    { day: 7, selectedDay: false, dayOfWeek: 0 },
-    { day: 8, selectedDay: true, dayOfWeek: 1 },
-    { day: 9, selectedDay: true, dayOfWeek: 2 },
-    { day: 10, selectedDay: true, dayOfWeek: 3 },
-    { day: 11, selectedDay: true, dayOfWeek: 4 },
-    { day: 12, selectedDay: false, dayOfWeek: 5 },
-    { day: 13, selectedDay: false, dayOfWeek: 6 },
-  ];
+  const [daysNeeded, setDaysNeeded] = useState(""); // 약속에 필요한 일 수
+  const [startTime, setStartTime] = useState(""); // 시작 시각
+  const [endTime, setEndTime] = useState(""); // 종료 시각
 
-  const sampleResult = [
-    { id: 1, start: "2025-12-08T14:00:00" },
-    { id: 2, start: "2025-12-10T14:00:00" },
-    { id: 3, start: "2025-12-09T13:00:00" },
-  ];
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [loadingOptimal, setLoadingOptimal] = useState(false);
+  const [error, setError] = useState("");
 
-  const formatDate = (iso) => {
-    const d = new Date(iso);
-    return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+  const [detail, setDetail] = useState(null);
+  const [optimal, setOptimal] = useState(null);
+
+  const accessToken = localStorage.getItem("access_token");
+ 
+  const formatDate = (dateStr) => {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return `${m}월 ${d}일`;
   };
 
-  function formatDay(dateString) {
-    const date = new Date(dateString);
+  function formatDay(dateStr) {
+    const date = new Date(dateStr + "T00:00:00");
     const days = ["일", "월", "화", "수", "목", "금", "토"];
     return days[date.getDay()] + "요일";
-  }
+  };
 
-  const formatTime = (iso) => {
-    const d = new Date(iso);
-    const hour = d.getHours();
-    const meridiem = hour < 12 ? "오전" : "오후";
-    const h = hour % 12 === 0 ? 12 : hour % 12;
+  const formatTime = (hhmm) => {
+    const [hh] = hhmm.split(":").map(Number);
+    const meridiem = hh < 12 ? "오전" : "오후";
+    const h = hh % 12 === 0 ? 12 : hh % 12;
     return `${meridiem} ${String(h).padStart(2, "0")}시`;
   };
 
-  const [daysNeeded, setDaysNeeded] = useState(""); // 약속에 필요한 일 수
-  const [startTime, setStartTime] = useState(""); // 시작 시간
-  const [endTime, setEndTime] = useState(""); // 종료 시간
+  const fetchDetail = async () => {
+    if (!inviteCode) return;
+
+    setLoadingDetail(true);
+    setError("");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/appointments/${inviteCode}/detail`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`detail 실패: ${res.status} ${text}`);
+      }
+
+      const data = await res.json();
+      setDetail(data);
+    } catch (e) {
+      setError(e?.message || "detail 불러오기 실패");
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const fetchOptimal = async (minDurationMinutes = 60) => {
+    if (!inviteCode) return;
+
+    setLoadingOptimal(true);
+    setError("");
+
+    try {
+      if (!accessToken) {
+        throw new Error("로그인이 필요해요 (accessToken 없음).");
+      }
+
+      const url = new URL(`${API_BASE_URL}/appointments/${inviteCode}/optimal-times`);
+      url.searchParams.set("min_duration_minutes", String(minDurationMinutes));
+
+      const res = await fetch(url.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`optimal-times 실패: ${res.status} ${text}`);
+      }
+
+      const data = await res.json();
+      setOptimal(data);
+    } catch (e) {
+      setError(e?.message || "optimal-times 불러오기 실패");
+    } finally {
+      setLoadingOptimal(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetail();
+    fetchOptimal(60);
+  }, [inviteCode]);
+
+  const daysForGrid = useMemo(() => {
+    if (!detail?.dates) return [];
+
+    return detail.dates.map((d) => {
+      const dateStr = typeof d.date === "string" ? d.date : String(d.date);
+      const dt = new Date(dateStr + "T00:00:00");
+
+      return {
+        key: dateStr,
+        dateStr,
+        day: dt.getDate(),
+        dayOfWeek: dt.getDay(),
+        selectedDay: d.availability !== "none", // none이면 비선택처럼
+      };
+    });
+  }, [detail]);
+
+  const monthText = useMemo(() => {
+    if (!daysForGrid.length) return "약속";
+    const dt = new Date(daysForGrid[0].dateStr + "T00:00:00");
+    return `${dt.getMonth() + 1}월`;
+  }, [daysForGrid]);
+
+  const optimalList = useMemo(() => optimal?.optimal_times || [], [optimal]);
+
+  // 입력값으로 min_duration_minutes 재계산 (시간대 차이로 분 계산)
+  const computeMinDuration = () => {
+    const s = Number(startTime);
+    const e = Number(endTime);
+    if (Number.isFinite(s) && Number.isFinite(e) && e > s) return (e - s) * 60;
+    return 60;
+  };
+
+  const onRefetchOptimal = () => {
+    fetchOptimal(computeMinDuration());
+  };
 
   return (
     <div className="resultPage">
@@ -131,24 +231,31 @@ const Result = () => {
         <div className="rangeContainer">
           <div className="rangeText">약속 범위</div>
           <div className="weekContainer">
-            <div className="monthText">12월</div>
+            <div className="monthText">{monthText}</div>
 
             {/* 날짜 그리드 */}
             <div className="weekGrid">
-              {sampleDays.map((day) => (
-                <div
-                  key={day.date}
-                  className={`dayCell ${day.selectedDay ? "selected" : ""}`}
-                >
+              {loadingDetail && <div>범위 불러오는 중...</div>}
+
+              {!loadingDetail && daysForGrid.length === 0 && (
+                <div>약속 범위 데이터가 없어요.</div>
+              )}
+
+              {!loadingDetail &&
+                daysForGrid.map((day) => (
                   <div
-                    className={`dayText
-                      ${day.dayOfWeek === 0 ? "sunday" : ""} 
-                      ${day.dayOfWeek === 6 ? "saturday" : ""}`}
+                    key={day.key}
+                    className={`dayCell ${day.selectedDay ? "selected" : ""}`}
                   >
-                    {day.day}
+                    <div
+                      className={`dayText
+                        ${day.dayOfWeek === 0 ? "sunday" : ""} 
+                        ${day.dayOfWeek === 6 ? "saturday" : ""}`}
+                    >
+                      {day.day}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
@@ -197,6 +304,11 @@ const Result = () => {
               />
               시까지예요.
             </label>
+            <div style={{ marginTop: 12 }}>
+              <button onClick={onRefetchOptimal} disabled={loadingOptimal}>
+                {loadingOptimal ? "추천 계산 중..." : "추천 다시 받기"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -208,17 +320,30 @@ const Result = () => {
             약쏙이 골라봤어요.
           </div>
           <div className="resultList">
-            {sampleResult.map((item, index) => (
-              <div key={item.id} className="resultCard">
-                <div className="resultNum">{index + 1}</div>
-                <div className="resultText">
-                  <div className="resultDate">
-                    {formatDate(item.start)} {formatDay(item.start)}
+            {loadingOptimal && <div>추천 불러오는 중...</div>}
+
+            {!loadingOptimal && !error && optimalList.length === 0 && (
+              <div>추천 가능한 시간이 없어요.</div>
+            )}
+
+            {!loadingOptimal &&
+              optimalList.slice(0, 5).map((item, index) => (
+                <div
+                  key={`${item.date}-${item.start_time}-${index}`}
+                  className="resultCard"
+                >
+                  <div className="resultNum">{index + 1}</div>
+
+                  <div className="resultText">
+                    <div className="resultDate">
+                      {formatDate(item.date)} {formatDay(item.date)}
+                    </div>
+                    <div className="resultTime">
+                      {formatTime(item.start_time)} ~ {formatTime(item.end_time)}
+                    </div>
                   </div>
-                  <div className="resultTime">{formatTime(item.start)}</div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>

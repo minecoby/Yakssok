@@ -1,11 +1,13 @@
+
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import { API_BASE_URL } from '../config/api';
 import './Calendar.css';
 
-const Calendar = ({ events: initialEvents = [] }) => {
+const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
   const calendarRef = useRef(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeView, setActiveView] = useState('dayGridMonth');
@@ -261,7 +263,7 @@ const Calendar = ({ events: initialEvents = [] }) => {
 
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           locale="ko"
           events={events}
@@ -286,6 +288,19 @@ const Calendar = ({ events: initialEvents = [] }) => {
           slotDuration="01:00:00"
           height="100%"
           handleWindowResize={true}
+
+          //우측 사이드바 관련 클릭 처리 (주간)
+          eventClick={(clickInfo) => {
+            const ev = clickInfo.event;
+            onEventSelect?.({
+              type: "event",
+              id: ev.id,
+              title: ev.title,
+              start: ev.start,
+              end: ev.end,
+              allDay: ev.allDay,
+            });
+          }}
 
           // 월간 날짜 셀 커스텀
           dayCellContent={(arg) => {
@@ -344,6 +359,36 @@ const Calendar = ({ events: initialEvents = [] }) => {
               );
             }
             return arg.dayNumberText;
+          }}
+
+          //우측 사이드바 관련 dateClick 처리 (월간)
+          dateClick={(info) => {
+            if (info.view.type !== "dayGridMonth") return;
+
+            const clicked = new Date(info.date);
+            clicked.setHours(0, 0, 0, 0);
+
+            const dayEvents = (events || []).filter((e) => {
+              if (!e?.start) return false;
+              const d = new Date(e.start);
+              d.setHours(0, 0, 0, 0);
+              return d.getTime() === clicked.getTime();
+            });
+
+            if (dayEvents.length === 0) return;
+
+            //첫 일정만 보내도록 임시 설정
+            const first = dayEvents[0];
+
+            // Home으로 전달
+            onEventSelect?.({
+              type: "event",
+              id: first.id,
+              title: first.title,
+              start: first.start,
+              end: first.end,
+              allDay: first.allDay,
+            });
           }}
         />
       </div>

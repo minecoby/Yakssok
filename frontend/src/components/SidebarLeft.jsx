@@ -1,4 +1,3 @@
-
 import { useState, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SidebarLeft.css";
@@ -22,6 +21,24 @@ const SidebarLeft = ({ events = [] }) => {
   // 사이드바 상태
   const [isOpen, setIsOpen] = useState(false);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
+
+  const isCreatePage = location.pathname === "/create";
+  const handleNewButtonClick = () => {
+    // create 페이지 + 사이드바 닫힘 -> home
+    if (isCreatePage && !isOpen) {
+      navigate("/home");
+      return;
+    }
+
+    // create 페이지 + 사이드바 열림 -> 아무 것도 안 함
+    if (isCreatePage && isOpen) {
+      navigate(0)
+      return;
+    }
+
+    // 그 외 → create
+    navigate("/create");
+  };
 
   // 달력 및 약속 상태
   const today = new Date();
@@ -153,17 +170,20 @@ const SidebarLeft = ({ events = [] }) => {
         </div>
 
         {/* 새로운 약속 생성 버튼 */}
-        <button className="newButton" onClick={() => navigate("/create")}>
+        <button className="newButton" onClick={handleNewButtonClick}>
           {isOpen ? (
             <div className="buttonIcon">
               <NewButton />
             </div>
           ) : (
             <div className="buttonIconClosed">
-              <NewButtonClosed />
+              <div className={isCreatePage ? "newButtonRotated" : ""}>
+                <NewButtonClosed />
+              </div>            
             </div>
           )}
-          {isOpen ? <div className="buttonText">새로운 약속 만들기</div> : null}
+
+          {isOpen && <div className="buttonText">새로운 약속 만들기</div>}
         </button>
 
         <div className="iconRow">
@@ -194,11 +214,17 @@ const SidebarLeft = ({ events = [] }) => {
 
           {/* 요일 */}
           <div className="calendarGrid daysofWeek">
-            {daysofWeek.map((day, index) => (
-              <div key={index} className="dayName">
-                {day}
-              </div>
-            ))}
+            {daysofWeek.map((day, index) => {
+              let className = "dayName";
+              if (index === 0) className += " sunday";
+              else if (index === 6) className += " saturday";
+
+              return (
+                <div key={index} className={className}>
+                  {day}
+                </div>
+              );
+            })}
           </div>
 
           {/* 날짜 */}

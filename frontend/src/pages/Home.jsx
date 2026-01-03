@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; 
 import Calendar from '../components/Calendar';
-import SidebarLeft from '../components/SidebarLeft';
 import SidebarRight from '../components/SidebarRight';
 import { useState } from "react";
 import './Home.css';
@@ -104,9 +103,6 @@ const Home = () => {
     <div className="home-container">
       {/* Header */}
       <header className="home-header"></header>
-
-      {/* SidebarLeft */}
-      <SidebarLeft events={sampleEvents} />
 
       {/* 캘린더 영역 */}
       <main className="main-content">

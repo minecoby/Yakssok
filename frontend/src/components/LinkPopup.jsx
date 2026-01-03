@@ -3,7 +3,7 @@ import "./LinkPopup.css";
 import LinkCopy from "../assets/LinkCopy.svg"
 import { useNavigate } from "react-router-dom";
 
-export default function LinkPopup({ open, link }) {
+export default function LinkPopup({ open, link, inviteCode }) {
   if (!open) return null;
 
   const handleCopy = async () => {
@@ -38,7 +38,7 @@ export default function LinkPopup({ open, link }) {
           </button>
         </div>
 
-        <button type="button" className="lp-close-btn" onClick={() => navigate("/result")}>
+        <button type="button" className="lp-close-btn" onClick={() => navigate(`/result/${inviteCode}`)}>
           닫기
         </button>
       </div>

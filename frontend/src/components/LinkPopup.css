@@ -75,6 +75,10 @@
   border-radius: 0 10px 10px 0;
 }
 
+.lp-copy-btn:hover {
+  background: #85837B;
+}
+
 .lp-close-btn {
   width: 143px;
   height: 57px;

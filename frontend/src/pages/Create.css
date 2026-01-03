@@ -75,7 +75,11 @@
 
     box-sizing: border-box;
 
-    margin-bottom: 486px;
+    margin-bottom: 266px;
+}
+
+.number-input-container {
+    padding-top: 220px;
 }
 
 .number-input {
@@ -143,4 +147,25 @@
   background: #EAEEE0;
   color: #85837B;
   cursor: not-allowed;
+}
+
+.floating-next {
+  position: fixed;
+  left: 52%;
+  bottom: 50px;
+  width: 55px;
+  height: 55px;
+  padding: 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EAEEE0;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.floating-next:hover {
+  transform: translateY(-2px);
 }

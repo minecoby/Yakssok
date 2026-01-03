@@ -1,3 +1,66 @@
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
+    font-weight: 900;
+    font-display: swap;
+}
+
 button:focus {
   outline: none;
   box-shadow: none;
@@ -9,7 +72,7 @@ button:focus {
   top: 0px;
   left: 0px;
   height: 100vh;
-  background: #eaeee0;
+  background: #E9EDE2;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -104,12 +167,18 @@ button:focus {
   background: black;
   border: None;
   border-radius: 15px;
-  font-size: 16px;
   cursor: pointer;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+}
+
+.newButtonRotated {
+  transform: rotate(45deg);
+  transform-origin: center;
+  display: inline-flex;
+  transition: transform 0.2s ease;
 }
 
 .sidebarLeft.closed .newButton {
@@ -177,10 +246,11 @@ button:focus {
 }
 
 .iconText {
-  font-family: "Pretendard";
+  font-family: 'Pretendard';
   font-style: normal;
   font-weight: 500;
   font-size: 10px;
+  line-height: 20px;
   color: #85837b;
   order: 1;
   flex-grow: 1;
@@ -205,17 +275,23 @@ button:focus {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  font-family: "Pretendard";
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 500;
   font-size: 15px;
+  line-height: 18px;
   color: #85837b;
 }
 
 /* 월 이동 버튼 */
 .moveMonth {
   background: none;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
   font-size: 15px;
-  font-weight: 300;
+  line-height: 18px;
+
   border: None;
   cursor: pointer;
   color: #7b7878;
@@ -225,8 +301,11 @@ button:focus {
 /* 오늘 버튼 */
 .todayButton {
   background: none;
-  font-size: 12px;
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 300;
+  font-size: 12px;
+  line-height: 14px;
   border: None;
   cursor: pointer;
   color: #85837b;
@@ -242,8 +321,11 @@ button:focus {
 
 /* 요일 텍스트 */
 .dayName {
-  font-size: 12px;
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 300;
+  font-size: 12px;
+  line-height: 14px;
   text-align: center;
   padding: 5px 0;
   color: #85837b;
@@ -257,8 +339,21 @@ button:focus {
   align-items: center;
   justify-content: center;
   color: #85837b;
-  font-size: 11px;
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 500;
+  font-size: 11px;
+  line-height: 13px;
+}
+
+.day.sunday, 
+.dayName.sunday {
+  color: #eeb1b1;
+}
+
+.day.saturday, 
+.dayName.saturday {
+  color: #74abb4;
 }
 
 /* 빈 날짜 */
@@ -267,7 +362,9 @@ button:focus {
 }
 
 /* 약속 표시 */
-.hasAppointment {
+.hasAppointment, 
+.sunday.hasAppointment, 
+.saturday.hasAppointment {
   width: 100%;
   color: #fafff2;
   background: #1f1f1f;
@@ -330,8 +427,11 @@ button:focus {
 }
 
 .appointmentText {
-  font-size: 13px;
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 500;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .sidebarLeft.closed .appointments {

@@ -1,16 +1,79 @@
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
+    font-weight: 900;
+    font-display: swap;
+}
+
 /* --- 페이지 레이아웃 --- */
 .resultPage {
   display: flex;
   width: 100vw;
   height: 100vh;
-  background-color: #F5F6EF;
+  background-color: #e9ede2;
   overflow: hidden;
 }
 
 /* --- 메인 컨테이너 --- */
 .resultContainer {
   flex: 1;
-  background-color: #F5F6EF;
+  background-color: #fafff2;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -28,14 +91,17 @@
   display: flex;
   margin: 25px;
   color: #85837b;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
   font-size: 20px;
+  line-height: 24px;
   align-items: center;
   justify-content: center;
 }
 
 .weekContainer {
-  width: 100%;
-  padding: 30px 0;
+  padding: 30px;
   border-top: 1px solid rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   display: flex;
@@ -45,7 +111,11 @@
 
 .monthText {
   display: flex;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 200;
   font-size: 30px;
+  line-height: 45px;
   color: #292929;
   width: 245px;
   height: 45px;
@@ -57,7 +127,7 @@
 .weekGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  column-gap: 30px;
+  gap: 30px;
   flex: 1;
 }
 
@@ -71,7 +141,11 @@
 }
 
 .dayText {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
   font-size: 15px;
+  line-height: 22px;
   color: #3e3e3e;
 }
 
@@ -100,7 +174,11 @@
 }
 
 .setText {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 300;
   font-size: 25px;
+  line-height: 34px;
   color: #85837b;
   margin: 45px;
   text-align: center;
@@ -109,15 +187,26 @@
 .setInput {
   background-color: #e9ede2;
   color: #292929;
-  width: 50px;
+  width: 100px;
   height: 60px;
-  padding: 10px 20px;
-  margin: 20px;
+  padding: 10px;
+  margin: 10px;
   border: none;
   border-radius: 15px;
-  font-size: 30px;
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 500;
+  font-size: 30px;
+  line-height: 45px;
   text-align: center;
+  box-sizing: border-box;
+}
+
+select.setInput option {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 200;
+  font-size: 20px;
 }
 
 /* --- 추천 날짜 --- */
@@ -129,7 +218,11 @@
 }
 
 .noticeText {
-  font-size: 35px;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 200;
+  font-size: 30px;
+  line-height: 45px;
   color: #292929;
   margin: 45px;
   text-align: center;
@@ -144,7 +237,7 @@
 }
 
 .resultCard {
-  width: 600px;
+  width: 900px;
   padding: 10px 30px;
   border-radius: 20px;
   background: #e9ede2;
@@ -163,7 +256,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 18px;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 45px;
   color: #ffffff;
 }
 
@@ -172,11 +269,20 @@
   align-items: center;
   gap: 60px;
 
-  font-size: 30px;
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 300;
+  font-size: 25px;
+  line-height: 34px;
+
   color: #292929;
 }
 
 .resultDate {
   width: 250px;
+  font-family: 'Pretendard';
+  font-style: normal;
   font-weight: 500;
+  font-size: 30px;
+  line-height: 45px;
 }

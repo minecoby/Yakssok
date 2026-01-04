@@ -114,3 +114,9 @@ class AppointmentListResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SyncMySchedulesResponse(BaseModel):
+    total_appointments: int
+    updated_count: int
+    failed_count: int

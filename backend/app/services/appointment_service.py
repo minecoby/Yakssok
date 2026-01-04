@@ -345,3 +345,62 @@ class AppointmentService:
         appointments = result.scalars().all()
 
         return appointments
+
+    @staticmethod
+    async def sync_my_schedules(user_id: str, db: AsyncSession) -> dict:
+        # 내가 참여한 모든 약속의 일정 동기화
+
+        user = await UserService.get_user_by_google_id(str(user_id), db)
+        if not user or not user.google_refresh_token:
+            raise ValueError("구글 캘린더 연동이 필요합니다")
+
+        # 참여 중인 약속 조회
+        result = await db.execute(
+            select(Appointments)
+            .join(Participations, Appointments.id == Participations.appointment_id)
+            .where(Participations.user_id == user_id)
+            .where(Appointments.status == "VOTING")
+        )
+        appointments = result.scalars().all()
+
+        updated_count = 0
+        failed_count = 0
+
+        # 각 약속에 대해 일정 재계산
+        for appointment in appointments:
+            try:
+                participation = await AppointmentService._get_participation(
+                    user_id, appointment.id, db
+                )
+
+                if not participation:
+                    failed_count += 1
+                    continue
+
+                candidate_dates_obj = await AppointmentService.get_appointment_dates(
+                    appointment.id, db
+                )
+                candidate_dates = [ad.candidate_date for ad in candidate_dates_obj]
+
+                available_slots = await ScheduleAnalyzer.calculate_available_slots(
+                    user=user, candidate_dates=candidate_dates
+                )
+
+                if available_slots:
+                    participation.available_slots = json.dumps(
+                        available_slots, ensure_ascii=False
+                    )
+                    updated_count += 1
+                else:
+                    failed_count += 1
+
+            except Exception:
+                failed_count += 1
+
+        await db.commit()
+
+        return {
+            "total_appointments": len(appointments),
+            "updated_count": updated_count,
+            "failed_count": failed_count,
+        }

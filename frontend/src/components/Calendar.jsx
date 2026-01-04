@@ -21,17 +21,33 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
     (items = []) =>
       items
         .map((item) => {
-          const start = item?.start?.dateTime || item?.start?.date;
-          const end = item?.end?.dateTime || item?.end?.date;
+          const isAllDay = Boolean(item?.start?.date);
+          let start = item?.start?.dateTime || item?.start?.date;
+          let end = item?.end?.dateTime || item?.end?.date;
 
           if (!start) return null;
+
+          if (isAllDay) {
+            const startDateStr = item.start.date;
+            const endDateStr =
+              item.end?.date ||
+              new Date(new Date(startDateStr).getTime() + 24 * 60 * 60 * 1000)
+                .toISOString()
+                .slice(0, 10);
+
+            start = `${startDateStr}T00:00:00`;
+            end = `${endDateStr}T00:00:00`;
+          }
 
           return {
             id: item.id || `${start}-${item.summary}`,
             title: item.summary || '제목 없음',
             start,
             end,
-            allDay: Boolean(item?.start?.date),
+            allDay: false,
+            extendedProps: {
+              isAllDay,
+            },
           };
         })
         .filter(Boolean),
@@ -197,12 +213,15 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
         statusClass = "past-event";
       }
 
+      const isAllDay = event.extendedProps?.isAllDay;
+      const displayTimeText = isAllDay ? '00:00 - 24:00' : timeText;
+
       return (
         <div className={`custom-event-content ${statusClass}`}>
           <div className="event-title">{event.title}</div>
-          {timeText && (
+          {displayTimeText && (
             <div className="event-time-container">
-              <span className="event-time-start">{timeText}</span>
+              <span className="event-time-start">{displayTimeText}</span>
             </div>
           )}
         </div>
@@ -286,7 +305,7 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
           slotMinTime="00:00:00"
           slotMaxTime="24:00:00"
           slotDuration="01:00:00"
-          height="100%"
+          height="auto"
           handleWindowResize={true}
 
           //우측 사이드바 관련 클릭 처리 (주간)
@@ -326,7 +345,15 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
                 return <div className="date-number">{arg.dayNumberText.replace("일", "")}</div>;
               }
 
-              const displayEvents = dayEvents.slice(0, 2);
+              const displayEvents = [...dayEvents]
+                .sort((a, b) => {
+                  const aStart = a?.start ? new Date(a.start).getTime() : Number.POSITIVE_INFINITY;
+                  const bStart = b?.start ? new Date(b.start).getTime() : Number.POSITIVE_INFINITY;
+
+                  if (aStart !== bStart) return aStart - bStart;
+                  return (a?.title || '').localeCompare(b?.title || '');
+                })
+                .slice(0, 2);
 
               let backgroundColor = "";
               let textColor = "#1F1F1F";
@@ -350,11 +377,17 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
                   <div className="calendar-date-num" style={{ color: textColor }}>
                     {arg.dayNumberText.replace("일", "")}
                   </div>
-                  {displayEvents.map((ev, i) => (
-                    <div key={i} className="calendar-event-title" style={{ color: textColor }}>
-                      {ev.title}
-                    </div>
-                  ))}
+                  <div className="calendar-event-list">
+                    {displayEvents.map((ev, i) => (
+                      <div
+                        key={i}
+                        className="calendar-event-title"
+                        style={{ color: textColor }}
+                      >
+                        {ev.title}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             }

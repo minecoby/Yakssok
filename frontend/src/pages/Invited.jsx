@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import LogoIconWhite from "../assets/LogoIconWhite";
 import EditIcon from "../assets/EditIcon";
 import CreateEvent from '../components/CreateEvent';
@@ -13,6 +13,7 @@ import './Invited.css';
 const Invited = () => {
   const { code } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const initialEvents = location.state ? location.state.events : [];
   const initialEventsWithId = initialEvents.map((event, index) => ({
     ...event,
@@ -214,6 +215,31 @@ const Invited = () => {
       : "약속 없음";
   };
 
+  // 날짜별 참여 가능 계산 (결과 화면 용)
+  const buildAvailability = () => {
+    return candidateDates.map(candidate => ({
+      date: candidate.date.toISOString().slice(0, 10),
+      isAvailable: getEventsForDate(candidate.date).length === 0
+    }));
+  };
+
+  // 참여 가능 정보 전송
+  const sendAvailability = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    await fetch(`${API_BASE_URL}/appointments/${code}/availability`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        availability: buildAvailability(),
+      }),
+    });
+  };
+
   const toggleMenu = (e, date) => {
     e.stopPropagation(); 
 
@@ -257,14 +283,14 @@ const Invited = () => {
       setViewMode('update');
       setActiveMenuId(null);
     } else {
-        alert("수정할 약속이 없습니다.");
+        alert("수정할 약속이 없어요.");
     }
   };
 
   const enterDeleteMode = (date) => {
     const dayEvents = getEventsForDate(date);
     if (dayEvents.length === 0) {
-        alert("삭제할 약속이 없습니다.");
+        alert("삭제할 약속이 없어요.");
         return;
     }
     
@@ -296,7 +322,7 @@ const Invited = () => {
 
   const confirmDelete = () => {
     if (selectedDeleteIds.length === 0) {
-        alert("선택된 일정이 없습니다.");
+        alert("선택된 일정이 없어요.");
         return;
     }
 
@@ -365,7 +391,7 @@ const Invited = () => {
     }
 
     if (pendingAddEvents.length === 0 && pendingDeleteIds.length === 0) {
-      alert('추가하거나 삭제할 일정이 없습니다.');
+      alert('추가하거나 삭제한 일정은 없어요.');
       return;
     }
 
@@ -420,6 +446,16 @@ const Invited = () => {
     } catch (error) {
       console.error(error);
       alert(error.message || '캘린더 동기화 중 문제가 발생했습니다.');
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      await syncWithGoogleCalendar(); // 구글 캘린더 반영
+      await sendAvailability();      // 참여 가능 정보 서버에 전송
+      navigate(`/result/${code}`);    // 결과 페이지로 이동
+    } catch (e) {
+      alert("처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -514,14 +550,6 @@ const Invited = () => {
                     ) : (
                       <span className="event-title">약속 없음</span>
                     )}
-                    {/* <span className="availability-chip">
-                      {candidate.availableCount}/{candidate.totalCount} 참여
-                      {candidate.availability === "all"
-                        ? " - 모두 가능"
-                        : candidate.availability === "partial"
-                        ? " - 일부 가능"
-                        : " - 미응답"}
-                    </span> */}
                   </div>
                 </div>
               );
@@ -582,7 +610,7 @@ const Invited = () => {
             </>
         ) : (
             <>
-                <button className="confirm-btn" onClick={syncWithGoogleCalendar}>확인</button>
+                <button className="confirm-btn" onClick={handleConfirm}>확인</button>
                 <button className="edit-btn">나의 일정 수정하기</button>
             </>
         )}

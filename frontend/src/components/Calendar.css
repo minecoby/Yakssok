@@ -7,7 +7,8 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  height: 100vh; 
+  height: 100%;
+  min-height: 0;
 }
 
 .custom-header {
@@ -123,7 +124,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 .fc-daygrid-day-frame {
   position: relative;
   padding: 10px;
-  height: 104px;  
+  height: 125px;  
   width: 160px;  
   border-radius: 5px;
   display: flex;
@@ -348,21 +349,27 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   flex-direction: column;
   flex: 1;
   height: 100%;
+  min-height: 0;
 }
 
 /* 헤더 고정 */
 .fc-timegrid-header {
-  position: sticky;
   top: 0;
   background-color: #FAFFF2;
   z-index: 10;
 }
 
+.fc-col-header,
+.fc-col-header table {
+  background-color: #FAFFF2;
+}
+
+
 /* 시간 영역 스크롤 */
 .fc-timegrid-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  height: 80vh; 
 }
 
 /* 스크롤바 스타일 */
@@ -385,9 +392,6 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   font-size: 15px;
   font-weight: 500;
 }
-
-/* All-day 슬롯 숨기기 */
-.fc-timegrid-all-day, .fc-timegrid-all-day-head { display: none; }
 
 /* ---------------------------------------------------- /
 / 주간 캘린더 이벤트 위치 및 구조 /
@@ -441,20 +445,21 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 }
 
 /* ---------------------------------------------------- */
-/* 이벤트 박스(Figma Today Box 스타일 적용) */
+/* 이벤트 박스 */
 /* ---------------------------------------------------- */
 .calendar-day-box {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
 
-  padding: 13px 12px;
-  gap: 10px;
+  padding: 6px 12px;
+  gap: 0px;
 
-  width: 115px;
-  height: 80px;  /* 임시 고정 높이 */
+  width: 135px;
+  height: 98px;  /* 임시 고정 높이 */
 
-  background: #F9CBAA; /* JS에서 override */
+  background: #F9CBAA;
   box-shadow: 0px 3px 3px rgba(62, 62, 62, 0.05);
   border-radius: 15px;
 
@@ -468,26 +473,30 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   font-weight: 500;
   font-size: 15px;
   line-height: 22px;
+  margin: 3px 1px;
 
   color: #FFFFFF;
 }
 
-/* 이벤트 정보 Wrapping */
+/* 이벤트 제목 */
 .calendar-event-title {
   font-style: normal;
   font-weight: 500;
   font-size: 13px;
-  line-height: 20px;
+  line-height: 16px;
+  margin: 3px 1px;
 
   color: inherit !important;
-  margin-top: 5px;
 
   white-space: normal; 
-
-  
 }
 
-/* 시간(있을 경우) */
+.calendar-event-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 시간 */
 .calendar-event-time {
   font-family: 'Pretendard';
   font-style: normal;

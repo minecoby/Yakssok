@@ -371,9 +371,21 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
 
               const dayEvents = events.filter(e => {
                 if (!e.start) return false;
-                const eDate = new Date(e.start);
-                eDate.setHours(0, 0, 0, 0);
-                return eDate.getTime() === cellDate.getTime();
+                const eventStart = new Date(e.start);
+                eventStart.setHours(0, 0, 0, 0);
+
+                const hasEnd = Boolean(e.end);
+                const eventEnd = hasEnd ? new Date(e.end) : new Date(e.start);
+                eventEnd.setHours(0, 0, 0, 0);
+
+                if (e.extendedProps?.isAllDay && hasEnd) {
+                  eventEnd.setDate(eventEnd.getDate() - 1);
+                }
+
+                return (
+                  cellDate.getTime() >= eventStart.getTime() &&
+                  cellDate.getTime() <= eventEnd.getTime()
+                );
               });
 
               if (!dayEvents || dayEvents.length === 0) {

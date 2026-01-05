@@ -172,6 +172,33 @@ const Invited = () => {
     fetchUserEvents();
   }, [fetchUserEvents]);
 
+  const isEventCoveringDate = (event, date) => {
+    if (!event?.start) return false;
+
+    const normalizeMidnight = (value) => {
+      const normalized = new Date(value);
+      normalized.setHours(0, 0, 0, 0);
+      return normalized;
+    };
+
+    const targetDate = normalizeMidnight(date);
+    const eventStart = normalizeMidnight(event.start);
+    const eventEnd = event.end ? normalizeMidnight(event.end) : eventStart;
+
+    if (event.allDay) {
+      eventEnd.setDate(eventEnd.getDate() - 1);
+    }
+
+    const [startMs, endMs] = [eventStart.getTime(), eventEnd.getTime()];
+
+    // 종료일이 시작일보다 앞선 경우에는 시작일만 비교
+    if (endMs < startMs) {
+      return targetDate.getTime() === startMs;
+    }
+
+    return targetDate.getTime() >= startMs && targetDate.getTime() <= endMs;
+  };
+
   useEffect(() => {
     if (candidateDates.length === 0) {
       setFilteredEvents([]);
@@ -186,27 +213,14 @@ const Invited = () => {
       })
     );
 
-    const filtered = allEvents.filter((event) => {
-      if (!event.start) return false;
-      const eventDate = new Date(event.start);
-      if (isNaN(eventDate.getTime())) return false;
-
-      eventDate.setHours(0, 0, 0, 0);
-
-      return candidateDateSet.has(eventDate.getTime());
-    });
+    const filtered = allEvents.filter((event) =>
+      candidateDates.some((candidate) => isEventCoveringDate(event, candidate.date))
+    );
     setFilteredEvents(filtered); 
   }, [allEvents, candidateDates]); 
 
   const getEventsForDate = (date) => {
-    const targetDate = new Date(date);
-    targetDate.setHours(0, 0, 0, 0);
-
-    return filteredEvents.filter(event => {
-      const eventDate = new Date(event.start);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate.getTime() === targetDate.getTime(); 
-    });
+    return filteredEvents.filter((event) => isEventCoveringDate(event, date));
   };
   
   const getEventTitleForDate = (date) => {
@@ -216,29 +230,28 @@ const Invited = () => {
       : "약속 없음";
   };
 
-  // 날짜별 참여 가능 계산 (결과 화면 용)
-  const buildAvailability = () => {
-    return candidateDates.map(candidate => ({
-      date: candidate.date.toISOString().slice(0, 10),
-      isAvailable: getEventsForDate(candidate.date).length === 0
-    }));
-  };
+  const syncMySchedules = async () => {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+      throw new Error('일정 동기화를 위해 로그인 후 다시 시도해주세요.');
+    }
 
-  // 참여 가능 정보 전송
-  const sendAvailability = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    await fetch(`${API_BASE_URL}/appointments/${code}/availability`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE_URL}/appointments/sync-my-schedules`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        availability: buildAvailability(),
-      }),
     });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const message = data?.detail || '약속 일정 동기화에 실패했습니다.';
+      throw new Error(message);
+    }
+
+    return data;
   };
 
   const toggleMenu = (e, date) => {
@@ -271,13 +284,9 @@ const Invited = () => {
   };
 
   const handleEditClick = (date, eventTitleString) => {
-    const targetEvent = allEvents.find(event => {
-      const eDate = new Date(event.start);
-      eDate.setHours(0,0,0,0);
-      const dDate = new Date(date);
-      dDate.setHours(0,0,0,0);
-      return eDate.getTime() === dDate.getTime() && eventTitleString.includes(event.title);
-    });
+    const targetEvent = getEventsForDate(date).find((event) =>
+      eventTitleString.includes(event.title)
+    );
 
     if (targetEvent) {
       setSelectedEvent(targetEvent);
@@ -301,13 +310,7 @@ const Invited = () => {
   };
 
   const toggleDeleteSelection = (date) => {
-    const targetEvents = allEvents.filter(event => {
-      const eDate = new Date(event.start);
-      eDate.setHours(0,0,0,0);
-      const dDate = new Date(date);
-      dDate.setHours(0,0,0,0);
-      return eDate.getTime() === dDate.getTime();
-    });
+    const targetEvents = getEventsForDate(date);
 
     if (targetEvents.length === 0) return;
 
@@ -443,7 +446,7 @@ const Invited = () => {
       await fetchUserEvents();
       setPendingAddEvents([]);
       setPendingDeleteIds([]);
-      alert('구글 캘린더와 동기화되었습니다.');
+      alert('구글 캘린더와 동기화되었어요. 잠시만 기다려주세요.');
     } catch (error) {
       console.error(error);
       alert(error.message || '캘린더 동기화 중 문제가 발생했습니다.');
@@ -453,10 +456,17 @@ const Invited = () => {
   const handleConfirm = async () => {
     try {
       await syncWithGoogleCalendar(); // 구글 캘린더 반영
-      await sendAvailability();      // 참여 가능 정보 서버에 전송
+      const syncResult = await syncMySchedules(); // 내가 참여한 약속 일정 동기화
+
+      if (syncResult) {
+        alert(
+          `총 ${syncResult.total_appointments}개의 약속 중 ${syncResult.updated_count}개를 동기화했어요.\n실패: ${syncResult.failed_count}개`
+        );
+      }
+
       navigate(`/result/${code}`);    // 결과 페이지로 이동
     } catch (e) {
-      alert("처리 중 오류가 발생했습니다.");
+      alert(e?.message || "처리 중 오류가 발생했습니다.");
     }
   };
 

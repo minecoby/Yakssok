@@ -1,1 +1,10 @@
 backend/app/.env
+backend/.venv
+backend/.vscode
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

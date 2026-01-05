@@ -11,4 +11,15 @@ repos:
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.17.1
     hooks:
+
       - id: mypy
+        additional_dependencies:
+          - types-requests
+          - types-urllib3
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false

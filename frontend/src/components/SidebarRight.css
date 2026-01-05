@@ -11,6 +11,7 @@
     display: flex;
     justify-content: flex-end;
     z-index: 1000;
+    zoom: 0.95;
 }
 
 .sidebar {
@@ -182,3 +183,20 @@
 
 .clock-hand.hour   { width: 3px; height: 60px; }
 .clock-hand.minute { width: 2px; height: 85px; }
+
+.index-container {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.index-button {
+  background: none;
+  border: none;
+}
+
+.index-button:disabled {
+  cursor: default;
+}

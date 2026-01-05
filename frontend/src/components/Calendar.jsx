@@ -1,13 +1,131 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { API_BASE_URL } from '../config/api';
 import './Calendar.css';
 
-const Calendar = ({ events }) => {
+const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
   const calendarRef = useRef(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeView, setActiveView] = useState('dayGridMonth');
+  const [dateRange, setDateRange] = useState(null);
+  const [events, setEvents] = useState(initialEvents);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [reauthUrl, setReauthUrl] = useState(null);
+
+  const normalizeEvents = useCallback(
+    (items = []) =>
+      items
+        .map((item) => {
+          const isAllDay = Boolean(item?.start?.date);
+          let start = item?.start?.dateTime || item?.start?.date;
+          let end = item?.end?.dateTime || item?.end?.date;
+
+          if (!start) return null;
+
+          if (isAllDay) {
+            const startDateStr = item.start.date;
+            const endDateStr =
+              item.end?.date ||
+              new Date(new Date(startDateStr).getTime() + 24 * 60 * 60 * 1000)
+                .toISOString()
+                .slice(0, 10);
+
+            start = `${startDateStr}T00:00:00`;
+            end = `${endDateStr}T00:00:00`;
+          }
+
+          return {
+            id: item.id || `${start}-${item.summary}`,
+            title: item.summary || '제목 없음',
+            start,
+            end,
+            allDay: false,
+            extendedProps: {
+              isAllDay,
+            },
+          };
+        })
+        .filter(Boolean),
+    []
+  );
+
+  // JWT 사용하여 구글 캘린더 API 호출
+  const fetchCalendarEvents = useCallback(
+    async ({ start, end }) => {
+      const token = localStorage.getItem('access_token');
+
+      if (!token) {
+        setError('로그인이 필요합니다.');
+        return;
+      }
+
+      if (!start || !end) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+      setReauthUrl(null);
+
+      try {
+        const aggregateEvents = [];
+        let pageToken = null;
+
+        // 페이징 처리하며 여러 번 API 호출
+        do {
+          const params = new URLSearchParams({
+            time_min: start.toISOString(),
+            time_max: end.toISOString(),
+            max_results: '50',
+          });
+
+          if (pageToken) {
+            params.set('page_token', pageToken);
+          }
+
+          // 실제 API 호출, JWT 인증 요청
+          const response = await fetch(
+            `${API_BASE_URL}/calendar/events?${params.toString()}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            const message = data?.detail || '캘린더를 불러오지 못했습니다.';
+            setError(message);
+            if (data?.reauthUrl) {
+              setReauthUrl(data.reauthUrl);
+            }
+            return;
+          }
+
+          if (Array.isArray(data?.events)) {
+            aggregateEvents.push(...data.events);
+          }
+          pageToken = data?.nextPageToken || null;
+        } while (pageToken);
+
+        // JWT 인증 성공 시 받은 데이터 화면에 반영
+        setEvents(normalizeEvents(aggregateEvents));
+        setReauthUrl(null);
+      } catch {
+        setError('캘린더를 불러오는 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [normalizeEvents]
+  );
 
   // 초기화: 오늘 날짜로 이동
   useEffect(() => {
@@ -17,6 +135,12 @@ const Calendar = ({ events }) => {
       setCurrentDate(calendarApi.getDate());
     }
   }, []);
+
+  useEffect(() => {
+    if (dateRange) {
+      fetchCalendarEvents(dateRange);
+    }
+  }, [dateRange, fetchCalendarEvents]);
 
   // 월/년도 표시 포맷팅
   const formatMonthAndYear = (date) => {
@@ -82,7 +206,6 @@ const Calendar = ({ events }) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // CSS 클래스 결정 (CSS 파일에 정의된 클래스 사용)
       let statusClass = "future-event";
       if (eventDate.getTime() === today.getTime()) {
         statusClass = "today-event";
@@ -90,21 +213,55 @@ const Calendar = ({ events }) => {
         statusClass = "past-event";
       }
 
+      const isAllDay = event.extendedProps?.isAllDay;
+      const displayTimeText = isAllDay ? '00:00 - 24:00' : timeText;
+
       return (
         <div className={`custom-event-content ${statusClass}`}>
           <div className="event-title">{event.title}</div>
-          {timeText && (
+          {displayTimeText && (
             <div className="event-time-container">
-              <span className="event-time-start">{timeText}</span>
+              <span className="event-time-start">{displayTimeText}</span>
             </div>
           )}
         </div>
       );
     }
 
-    // 월간은 dayCellContent에서 처리하므로 여기선 null
     return null;
   };
+
+  //우측 사이드바 관련 클릭 처리 (월간)
+  const openSidebarWithEventsOfDay = useCallback(
+    (cellDate) => {
+      const clicked = new Date(cellDate);
+      clicked.setHours(0, 0, 0, 0);
+
+      const dayEvents = (events || []).filter((e) => {
+        if (!e?.start) return false;
+        const d = new Date(e.start);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() === clicked.getTime();
+      })
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+      if (dayEvents.length === 0) return;
+
+      onEventSelect?.({
+      type: "events",
+      date: clicked,
+      events: dayEvents.map((ev) => ({
+        id: ev.id,
+        title: ev.title,
+        start: ev.start,
+        end: ev.end,
+        allDay: ev.allDay,
+        extendedProps: ev.extendedProps,
+      })),
+    });
+  },
+  [events, onEventSelect]
+  );
 
   return (
     <div className="w-full max-w-4xl p-6 bg-white rounded-lg shadow-xl">
@@ -138,10 +295,26 @@ const Calendar = ({ events }) => {
           </div>
         </div>
 
-        {/* FullCalendar 본체 */}
+        {error && (
+          <div className="calendar-error">
+            <span>{error}</span>
+            {reauthUrl && (
+              <button
+                type="button"
+                className="reauth-button"
+                onClick={() => (window.location.href = reauthUrl)}
+              >
+                다시 인증하기
+              </button>
+            )}
+          </div>
+        )}
+
+        {isLoading && <div className="calendar-loading">구글 캘린더를 불러오는 중입니다...</div>}
+
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           locale="ko"
           events={events}
@@ -149,6 +322,7 @@ const Calendar = ({ events }) => {
           datesSet={(info) => {
             setActiveView(info.view.type);
             setCurrentDate(info.view.currentStart);
+            setDateRange({ start: info.view.currentStart, end: info.view.currentEnd });
           }}
           dayHeaderContent={getDayHeaderContent}
           eventContent={renderEventContent}
@@ -163,8 +337,24 @@ const Calendar = ({ events }) => {
           slotMinTime="00:00:00"
           slotMaxTime="24:00:00"
           slotDuration="01:00:00"
-          height="100%"
+          height="auto"
           handleWindowResize={true}
+
+          //우측 사이드바 관련 클릭 처리 (주간)
+          eventClick={(clickInfo) => {
+            const ev = clickInfo.event;
+            onEventSelect?.({
+              type: "event",
+              event: {
+                id: ev.id,
+                title: ev.title,
+                start: ev.start,
+                end: ev.end,
+                allDay: ev.allDay,
+                extendedProps: ev.extendedProps,
+              },
+            });
+          }}
 
           // 월간 날짜 셀 커스텀
           dayCellContent={(arg) => {
@@ -190,7 +380,15 @@ const Calendar = ({ events }) => {
                 return <div className="date-number">{arg.dayNumberText.replace("일", "")}</div>;
               }
 
-              const displayEvents = dayEvents.slice(0, 2);
+              const displayEvents = [...dayEvents]
+                .sort((a, b) => {
+                  const aStart = a?.start ? new Date(a.start).getTime() : Number.POSITIVE_INFINITY;
+                  const bStart = b?.start ? new Date(b.start).getTime() : Number.POSITIVE_INFINITY;
+
+                  if (aStart !== bStart) return aStart - bStart;
+                  return (a?.title || '').localeCompare(b?.title || '');
+                })
+                .slice(0, 2);
 
               let backgroundColor = "";
               let textColor = "#1F1F1F";
@@ -210,15 +408,26 @@ const Calendar = ({ events }) => {
                 <div
                   className="calendar-day-box"
                   style={{ backgroundColor, color: textColor }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openSidebarWithEventsOfDay(arg.date);
+                  }}
                 >
                   <div className="calendar-date-num" style={{ color: textColor }}>
                     {arg.dayNumberText.replace("일", "")}
                   </div>
-                  {displayEvents.map((ev, i) => (
-                    <div key={i} className="calendar-event-title" style={{ color: textColor }}>
-                      {ev.title}
-                    </div>
-                  ))}
+                  <div className="calendar-event-list">
+                    {displayEvents.map((ev, i) => (
+                      <div
+                        key={i}
+                        className="calendar-event-title"
+                        style={{ color: textColor }}
+                      >
+                        {ev.title}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             }

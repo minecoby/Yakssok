@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; 
 import Calendar from '../components/Calendar';
-import SidebarLeft from '../components/SidebarLeft';
 import SidebarRight from '../components/SidebarRight';
 import { useState } from "react";
 import './Home.css';
@@ -98,14 +97,12 @@ const Home = () => {
   ];
 
   const [open, setOpen] = useState(false);
+  const [selectedPayload, setSelectedPayload] = useState(null);
 
   return (
     <div className="home-container">
       {/* Header */}
       <header className="home-header"></header>
-
-      {/* SidebarLeft */}
-      <SidebarLeft events={sampleEvents} />
 
       {/* 캘린더 영역 */}
       <main className="main-content">
@@ -116,20 +113,18 @@ const Home = () => {
           */
           // 임시 이벤트 데이터, props로 전달
           events={sampleEvents}
+          onEventSelect={(payload) => {
+            setSelectedPayload(payload);
+            setOpen(true);
+          }}
         />
       </main>
 
-      <SidebarRight open={open} onClose={() => setOpen(false)}>
-        {/* 여기에 캘린더/시간 선택 컴포넌트 넣기 */}
-      </SidebarRight>
-      
-      {/*우측 사이드바 임시 버튼*/}
-      <button onClick={() => setOpen(true)}></button>
-
-      {/* 파티원의 초대 페이지로 이동하는 임시 링크 */}
-      <Link to="/Invited" state={{ events: sampleEvents }}>
-        link
-      </Link>
+      <SidebarRight 
+        open={open} 
+        onClose={() => setOpen(false)} 
+        selectedPayload={selectedPayload}
+      />
       
     </div>
   );

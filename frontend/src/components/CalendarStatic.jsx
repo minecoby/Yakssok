@@ -2,10 +2,21 @@ import React, { useMemo } from "react";
 
 const KOR_DOW = ["일", "월", "화", "수", "목", "금", "토"];
 
-export default function CalendarStatic({ date }) {
-  const year = date.getFullYear();
-  const month = date.getMonth(); // 0~11
-  const selectedDay = date.getDate();
+export default function CalendarStatic({ dates = [] }) {
+  const anchor = dates[0] ? new Date(dates[0]) : new Date();
+
+  const year = anchor.getFullYear();
+  const month = anchor.getMonth();
+
+  const selectedSet = useMemo(() => {
+    const set = new Set();
+    for (const dt of dates) {
+      const d = new Date(dt);
+      d.setHours(0, 0, 0, 0);
+      set.add(d.toISOString().slice(0, 10));
+    }
+    return set;
+  }, [dates]);
 
   const { firstDay, daysInMonth } = useMemo(() => {
     const first = new Date(year, month, 1);
@@ -33,14 +44,24 @@ export default function CalendarStatic({ date }) {
       </div>
 
       <div className="cal-grid">
-        {cells.map((d, idx) => {
-          const isSel = d === selectedDay;
+        {cells.map((dayNum, idx) => {
+          if (!dayNum) {
+            return (
+              <div key={idx} className="cal-cell is-empty">
+                {""}
+              </div>
+            );
+          }
+
+          const key = new Date(year, month, dayNum).toISOString().slice(0, 10);
+          const isSel = selectedSet.has(key);
+
           return (
             <div
               key={idx}
-              className={`cal-cell ${d ? "" : "is-empty"} ${isSel ? "is-selected" : ""}`}
+              className={`cal-cell ${isSel ? "is-selected" : ""}`}
             >
-              {d ?? ""}
+              {dayNum}
             </div>
           );
         })}

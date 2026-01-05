@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import LogoIconWhite from "../assets/LogoIconWhite";
 import EditIcon from "../assets/EditIcon";
 import CreateEvent from '../components/CreateEvent';
@@ -7,78 +7,197 @@ import UpdateEvent from '../components/UpdateEvent';
 import ExclamationIcon from '../assets/ExclamationIcon';
 import CheckCircleIcon from '../assets/CheckCircleIcon';
 import EmptyCircleIcon from '../assets/EmptyCircleIcon';
+import { API_BASE_URL } from '../config/api';
 import './Invited.css'; 
 
 const Invited = () => {
-  const location = useLocation();  
-  const initialEvents = location.state ? location.state.events : []; 
+  const { code } = useParams();
+  const location = useLocation();
+
+  const navigate = useNavigate();
+  const initialEvents = location.state ? location.state.events : [];
+  const initialEventsWithId = initialEvents.map((event, index) => ({
+    ...event,
+    id: event.id || `generated-${index}-${Date.now()}`,
+  }));
 
   // 초기 데이터 로드 (ID가 없으면 강제로 생성)
-  const [allEvents, setAllEvents] = useState(() => {
-    return initialEvents.map((event, index) => ({
-      ...event,
-      id: event.id || `generated-${index}-${Date.now()}`
-    }));
-  });
+  const [allEvents, setAllEvents] = useState(initialEventsWithId);
+  const [pendingAddEvents, setPendingAddEvents] = useState([]);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 
-  const partyName = "앱티브 팀플 회의"; 
-
-  const partyDateRange = React.useMemo(() => ({
-    startDate: new Date(2025, 11, 1), 
-    endDate: new Date(2025, 12, 1),   
-  }), []);
-
-  const [dates, setDates] = useState([]); 
+  const [partyName, setPartyName] = useState("");
+  const [candidateDates, setCandidateDates] = useState([]);
+ 
   const [filteredEvents, setFilteredEvents] = useState([]); 
   
-  // 팝업 메뉴 상태
   const [activeMenuId, setActiveMenuId] = useState(null);
 
-  // 👇 [추가됨] 팝업 위치 및 타겟 날짜 저장
   const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
   const [menuTargetDate, setMenuTargetDate] = useState(null);
 
-  // 화면 모드: 'list', 'create', 'update', 'delete'
   const [viewMode, setViewMode] = useState('list');
 
-  // 추가, 수정을 위한 데이터
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // 삭제를 위한 데이터
   const [selectedDeleteIds, setSelectedDeleteIds] = useState([]);
 
-  // 날짜 배열 생성
+  // 초대 링크 기반 약속 정보 불러오기
   useEffect(() => {
-    const dateArray = [];
-    let currentDate = new Date(partyDateRange.startDate);
-    while (currentDate <= partyDateRange.endDate) {
-      dateArray.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1); 
-    }
-    setDates(dateArray); 
-  }, [partyDateRange]); 
+    const fetchAppointment = async () => {
+      if (!code) return;
 
-  // 이벤트 필터링 (allEvents 기준)
+      try {
+        const res = await fetch(`${API_BASE_URL}/appointments/${code}/detail`);
+        if (!res.ok) {
+          console.error("약속 조회 실패", res.status);
+          return;
+        }
+
+        const data = await res.json();
+        setPartyName(data.name || "");
+
+        if (data.dates && data.dates.length > 0) {
+          const parsedDates = data.dates
+            .map((item) => {
+              const parsedDate = new Date(item.date);
+              if (isNaN(parsedDate.getTime())) return null;
+
+              return {
+                date: parsedDate,
+                availability: item.availability || "none",
+                availableCount: item.available_count ?? 0,
+                totalCount: item.total_count ?? 0,
+              };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+          if (parsedDates.length > 0) {
+            setCandidateDates(parsedDates);
+          }
+        }
+      } catch (error) {
+        console.error("약속 정보를 불러오지 못했어요", error);
+      }
+    };
+
+    fetchAppointment();
+  }, [code]);
+
+  const normalizeEvents = useCallback((items = []) =>
+    items
+      .map((item) => {
+        const start = item?.start?.dateTime || item?.start?.date || item?.start;
+        const end = item?.end?.dateTime || item?.end?.date || item?.end;
+
+        if (!start) return null;
+
+        return {
+          id: item.id || `${start}-${item.summary || item.title}`,
+          title: item.summary || item.title || '제목 없음',
+          start,
+          end,
+          allDay: Boolean(item?.start?.date),
+        };
+      })
+      .filter(Boolean),
+  []);
+
+  const fetchUserEvents = useCallback(async () => {
+    if (candidateDates.length === 0) return;
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.warn('access_token이 없어 캘린더를 불러올 수 없습니다.');
+      return;
+    }
+
+    const sortedDates = [...candidateDates]
+      .map((item) => new Date(item.date))
+      .filter((d) => !isNaN(d.getTime()))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    if (sortedDates.length === 0) return;
+
+    const rangeStart = new Date(sortedDates[0]);
+    rangeStart.setHours(0, 0, 0, 0);
+    const rangeEnd = new Date(sortedDates[sortedDates.length - 1]);
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    try {
+      const aggregated = [];
+      let pageToken = null;
+
+      do {
+        const params = new URLSearchParams({
+          time_min: rangeStart.toISOString(),
+          time_max: rangeEnd.toISOString(),
+          max_results: '50',
+        });
+
+        if (pageToken) {
+          params.set('page_token', pageToken);
+        }
+
+        const response = await fetch(`${API_BASE_URL}/calendar/events?${params.toString()}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          const message = data?.detail || '캘린더를 불러오지 못했습니다.';
+          console.error(message);
+          return;
+        }
+
+        if (Array.isArray(data?.events)) {
+          aggregated.push(...data.events);
+        }
+
+        pageToken = data?.nextPageToken || null;
+      } while (pageToken);
+
+      setAllEvents(normalizeEvents(aggregated));
+    } catch (error) {
+      console.error('캘린더 불러오기 중 오류가 발생했습니다.', error);
+    }
+  }, [candidateDates, normalizeEvents]);
+
   useEffect(() => {
+    fetchUserEvents();
+  }, [fetchUserEvents]);
+
+  useEffect(() => {
+    if (candidateDates.length === 0) {
+      setFilteredEvents([]);
+      return;
+    }
+
+    const candidateDateSet = new Set(
+      candidateDates.map((item) => {
+        const normalized = new Date(item.date);
+        normalized.setHours(0, 0, 0, 0);
+        return normalized.getTime();
+      })
+    );
+
     const filtered = allEvents.filter((event) => {
       if (!event.start) return false;
       const eventDate = new Date(event.start);
       if (isNaN(eventDate.getTime())) return false;
 
-      const start = new Date(partyDateRange.startDate);
-      const end = new Date(partyDateRange.endDate);
-
       eventDate.setHours(0, 0, 0, 0);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
 
-      return eventDate >= start && eventDate <= end;
+      return candidateDateSet.has(eventDate.getTime());
     });
     setFilteredEvents(filtered); 
-  }, [allEvents, partyDateRange]); 
+  }, [allEvents, candidateDates]); 
 
-  // 해당 날짜의 이벤트 배열 반환
   const getEventsForDate = (date) => {
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
@@ -90,7 +209,6 @@ const Invited = () => {
     });
   };
   
-  // 날짜별 이벤트 제목 문자열 반환 (수정/삭제 등에서 사용)
   const getEventTitleForDate = (date) => {
     const dayEvents = getEventsForDate(date);
     return dayEvents.length > 0 
@@ -98,7 +216,31 @@ const Invited = () => {
       : "약속 없음";
   };
 
-  // 👇 [수정됨] 메뉴 토글 함수 (위치 계산 포함)
+  // 날짜별 참여 가능 계산 (결과 화면 용)
+  const buildAvailability = () => {
+    return candidateDates.map(candidate => ({
+      date: candidate.date.toISOString().slice(0, 10),
+      isAvailable: getEventsForDate(candidate.date).length === 0
+    }));
+  };
+
+  // 참여 가능 정보 전송
+  const sendAvailability = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    await fetch(`${API_BASE_URL}/appointments/${code}/availability`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        availability: buildAvailability(),
+      }),
+    });
+  };
+
   const toggleMenu = (e, date) => {
     e.stopPropagation(); 
 
@@ -106,35 +248,29 @@ const Invited = () => {
 
     const dateMs = date.getTime();
 
-    // 이미 열려있는 메뉴를 다시 누르면 닫기
     if (activeMenuId === dateMs) {
       setActiveMenuId(null);
       return;
     }
 
-    // 클릭한 버튼의 위치 계산
     const eventBox = e.currentTarget.closest('.event-box');
     const rect = e.currentTarget.getBoundingClientRect();
     setPopupPos({
-      top: rect.top -155, // 버튼 바로 아래
-      left: rect.left + 50 // 버튼 오른쪽 끝에 맞춰서 왼쪽으로 정렬 (팝업 너비 고려)
+      top: rect.top -155, 
+      left: rect.left + 50 
     });
 
     setMenuTargetDate(date);
     setActiveMenuId(dateMs);
   };
 
-  // 추가
   const handleAddClick = (date) => {
     setSelectedDate(date);
     setViewMode('create'); 
     setActiveMenuId(null);
   };
 
-  // 수정
   const handleEditClick = (date, eventTitleString) => {
-    // 문자열에 포함된 제목을 가진 이벤트를 찾음 (간단한 로직)
-    // 실제로는 ID나 정확한 매칭을 사용하는 것이 더 안전함
     const targetEvent = allEvents.find(event => {
       const eDate = new Date(event.start);
       eDate.setHours(0,0,0,0);
@@ -148,15 +284,14 @@ const Invited = () => {
       setViewMode('update');
       setActiveMenuId(null);
     } else {
-        alert("수정할 약속이 없습니다.");
+        alert("수정할 약속이 없어요.");
     }
   };
 
-  // 삭제 모드 진입
   const enterDeleteMode = (date) => {
     const dayEvents = getEventsForDate(date);
     if (dayEvents.length === 0) {
-        alert("삭제할 약속이 없습니다.");
+        alert("삭제할 약속이 없어요.");
         return;
     }
     
@@ -165,7 +300,6 @@ const Invited = () => {
     setActiveMenuId(null);
   };
 
-  // 삭제 선택 토글
   const toggleDeleteSelection = (date) => {
     const targetEvents = allEvents.filter(event => {
       const eDate = new Date(event.start);
@@ -189,28 +323,142 @@ const Invited = () => {
 
   const confirmDelete = () => {
     if (selectedDeleteIds.length === 0) {
-        alert("선택된 일정이 없습니다.");
+        alert("선택된 일정이 없어요.");
         return;
     }
+
+    const updatedPendingAdds = pendingAddEvents.filter(
+      (event) => !selectedDeleteIds.includes(event.id)
+    );
+
+    const newPendingDeleteIds = [
+      ...pendingDeleteIds,
+      ...selectedDeleteIds.filter(
+        (id) =>
+          !pendingDeleteIds.includes(id) &&
+          pendingAddEvents.every((event) => event.id !== id)
+      ),
+    ];
+
     const updatedEvents = allEvents.filter(e => !selectedDeleteIds.includes(e.id));
     setAllEvents(updatedEvents);
+    setPendingAddEvents(updatedPendingAdds);
+    setPendingDeleteIds(newPendingDeleteIds);
     setViewMode('list');
     setSelectedDeleteIds([]);
   };
 
   const saveNewEvent = (eventData) => {
-    const newEvent = { ...eventData, id: Date.now() };
-    setAllEvents([...allEvents, newEvent]); 
+    const newEvent = { ...eventData, id: `temp-${Date.now()}` };
+    setAllEvents([...allEvents, newEvent]);
+    setPendingAddEvents([...pendingAddEvents, newEvent]);
     setViewMode('list');
   };
 
   const updateEvent = (updatedEvent) => {
-    setAllEvents(allEvents.map(event => 
-      event.id === updatedEvent.id ? updatedEvent : event
-    ));
+    const isNewlyAdded = pendingAddEvents.some((event) => event.id === updatedEvent.id);
+
+    if (isNewlyAdded) {
+      setPendingAddEvents((prev) =>
+        prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+      );
+      setAllEvents((prev) =>
+        prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+      );
+      setViewMode('list');
+      return;
+    }
+
+    const replacementEvent = { ...updatedEvent, id: `temp-${Date.now()}` };
+
+    setPendingDeleteIds((prev) =>
+      prev.includes(updatedEvent.id) ? prev : [...prev, updatedEvent.id]
+    );
+
+    setPendingAddEvents((prev) => [...prev, replacementEvent]);
+
+    setAllEvents((prev) =>
+      prev.map((event) => (event.id === updatedEvent.id ? replacementEvent : event))
+    );
     setViewMode('list');
   };
 
+  const syncWithGoogleCalendar = async () => {
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+      alert('캘린더 동기화를 위해 로그인 후 다시 시도해주세요.');
+      return;
+    }
+
+    if (pendingAddEvents.length === 0 && pendingDeleteIds.length === 0) {
+      alert('추가하거나 삭제한 일정은 없어요.');
+      return;
+    }
+
+    try {
+      for (const deleteId of pendingDeleteIds) {
+        const res = await fetch(`${API_BASE_URL}/calendar/events/${deleteId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const message = (await res.json())?.detail || '일정 삭제에 실패했습니다.';
+          throw new Error(message);
+        }
+      }
+
+      for (const event of pendingAddEvents) {
+        const payload = {
+          summary: event.title || event.summary || '제목 없음',
+          description: event.description,
+          start: {
+            dateTime: new Date(event.start).toISOString(),
+            timeZone: 'Asia/Seoul',
+          },
+          end: {
+            dateTime: new Date(event.end || event.start).toISOString(),
+            timeZone: 'Asia/Seoul',
+          },
+        };
+
+        const res = await fetch(`${API_BASE_URL}/calendar/events`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const message = (await res.json())?.detail || '일정 추가에 실패했습니다.';
+          throw new Error(message);
+        }
+      }
+
+      await fetchUserEvents();
+      setPendingAddEvents([]);
+      setPendingDeleteIds([]);
+      alert('구글 캘린더와 동기화되었습니다.');
+    } catch (error) {
+      console.error(error);
+      alert(error.message || '캘린더 동기화 중 문제가 발생했습니다.');
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      await syncWithGoogleCalendar(); // 구글 캘린더 반영
+      await sendAvailability();      // 참여 가능 정보 서버에 전송
+      navigate(`/result/${code}`);    // 결과 페이지로 이동
+    } catch (e) {
+      alert("처리 중 오류가 발생했습니다.");
+    }
+  };
 
   if (viewMode === 'create') {
     return <CreateEvent date={selectedDate} onSave={saveNewEvent} onCancel={() => setViewMode('list')} />;
@@ -238,8 +486,8 @@ const Invited = () => {
         ) : (
           <>
             <div className="invitedLogo"> <LogoIconWhite /> </div>
-            <h1>{partyName}</h1>
-            <p>{partyName}에 초대되었어요</p>
+            <h1>{partyName || "약속"}</h1>
+            <p>{partyName || "약속"}에 초대되었어요</p>
             <p>약속 범위 안에서 나의 일정이예요</p>
           </>
         )}
@@ -247,17 +495,16 @@ const Invited = () => {
       
       <main className="main-content">
         <div className="date-selector-container">
-          {dates.length > 0 ? (
-            dates.map((date, index) => {
-              const dayEvents = getEventsForDate(date); 
+          {candidateDates.length > 0 ? (
+            candidateDates.map((candidate, index) => {
+              const dayEvents = getEventsForDate(candidate.date); 
               const hasEvent = dayEvents.length > 0;
-              const joinedTitles = dayEvents.map(e => e.title).join(", "); // 핸들러 전달용
+              const joinedTitles = dayEvents.map(e => e.title).join(", "); 
 
-              // 삭제 모드일 때 선택 여부 확인
               const isSelectedForDelete = hasEvent && allEvents.some(e => {
                   const eDate = new Date(e.start);
                   eDate.setHours(0,0,0,0);
-                  const dDate = new Date(date);
+                  const dDate = new Date(candidate.date);
                   dDate.setHours(0,0,0,0);
                   return eDate.getTime() === dDate.getTime() && selectedDeleteIds.includes(e.id);
               });
@@ -268,7 +515,7 @@ const Invited = () => {
                   className="event-box"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isDeleteMode && hasEvent) toggleDeleteSelection(date);
+                    if (isDeleteMode && hasEvent) toggleDeleteSelection(candidate.date);
                   }}
                   style={{ 
                     backgroundColor: hasEvent ? "#F9CBAA" : "#EAEEE0", 
@@ -277,7 +524,6 @@ const Invited = () => {
                     opacity: isDeleteMode && !hasEvent ? 0.5 : 1 
                   }}
                 >
-                  {/* 아이콘 버튼 영역 */}
                   {isDeleteMode ? (
                       hasEvent && (
                           <div className="edit-icon-pos">
@@ -285,18 +531,15 @@ const Invited = () => {
                           </div>
                       )
                   ) : (
-                      // 👇 [수정됨] 토글 함수에 이벤트 객체(e)와 날짜 전달
                       <button 
                         className="edit-icon-pos" 
-                        onClick={(e) => toggleMenu(e, date)}
+                        onClick={(e) => toggleMenu(e, candidate.date)}
                       >
                         <EditIcon />
                       </button>
                   )}
 
-                  {/* 🚨 기존 팝업 메뉴 위치는 삭제됨 (아래로 이동) */}
-
-                  <div className="event-date">{date.getDate()}</div> 
+                  <div className="event-date">{candidate.date.getDate()}</div> 
                   
                   <div className="event-info">
                     {hasEvent ? (
@@ -308,6 +551,14 @@ const Invited = () => {
                     ) : (
                       <span className="event-title">약속 없음</span>
                     )}
+                    {/* <span className="availability-chip">
+                      {candidate.availableCount}/{candidate.totalCount} 참여
+                      {candidate.availability === "all"
+                        ? " - 모두 가능"
+                        : candidate.availability === "partial"
+                        ? " - 일부 가능"
+                        : " - 미응답"}
+                    </span> */}
                   </div>
                 </div>
               );
@@ -318,12 +569,11 @@ const Invited = () => {
         </div>
       </main>
 
-      {/* 👇 [추가됨] 독립된 팝업 메뉴 렌더링 (스크롤 영향 안 받음) */}
       {activeMenuId && menuTargetDate && !isDeleteMode && (
         <div 
           className="popup-menu" 
           style={{ 
-            position: 'fixed', // 화면 기준 고정
+            position: 'fixed', 
             top: `${popupPos.top}px`, 
             left: `${popupPos.left}px` 
           }}
@@ -369,7 +619,7 @@ const Invited = () => {
             </>
         ) : (
             <>
-                <button className="confirm-btn">확인</button>
+                <button className="confirm-btn" onClick={handleConfirm}>확인</button>
                 <button className="edit-btn">나의 일정 수정하기</button>
             </>
         )}

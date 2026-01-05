@@ -1,12 +1,18 @@
 @font-face {
     font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Pretendard';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
     font-weight: 500;
     font-display: swap;
 }
 
 .sr-container {
-  width: 100%;
+  width: 98%;
   background: #FAFFF2;
   border-radius: 12px;
   padding: 10px 12px;
@@ -22,9 +28,10 @@
 }
 
 .sr-title {
+  font-family: 'Pretendard', sans-serif;
   font-size: 16px;
-  font-weight: 600;
-  color: #222;
+  font-weight: 300;
+  color: #666;
 }
 
 .sr-nav {
@@ -35,7 +42,7 @@
   background: transparent;
   font-size: 20px;
   cursor: pointer;
-  color: #333;
+  color: #666;
 }
 
 .sr-weekdays {

@@ -11,7 +11,9 @@ const AuthCallback = () => {
     if (token) {
       localStorage.setItem("access_token", token);
 
-      navigate("/home");
+      //navigate("/home", { replace: true });
+      // OAuth 콜백에서는 window.location 사용
+      window.location.replace("/home");
     } else {
       navigate("/");
     }

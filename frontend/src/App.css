@@ -6,3 +6,11 @@ body, html, #root {
   font-family: 'Pretendard', sans-serif;
   background-color: #EAEEE0;
 }
+
+.appLayout {
+  display: flex;
+}
+
+.content {
+  flex: 1;
+}

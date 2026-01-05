@@ -9,16 +9,18 @@ import { API_BASE_URL } from "../config/api";
 const Login = () => {
     const navigate = useNavigate();
 
-    const navigateToHome = () => {
-    navigate("/home");
-    };
+    // 이제 AuthCallback.jsx에서 처리하므로 주석 처리
+    // const navigateToHome = () => {
+    // navigate("/home");
+    // };
 
-    useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-        navigateToHome(); 
-        }
-    }, [navigate]);
+    // 로그인 시 이미 토큰이 있으면 홈으로 이동 임시 제거
+    // useEffect(() => {
+    // const token = localStorage.getItem("access_token");
+    // if (token) {
+    //     navigate("/home", { replace: true });
+    //     }
+    // }, [navigate]);
 
     const handleGoogleLogin = async () => {
         try {

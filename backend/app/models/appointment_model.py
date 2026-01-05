@@ -41,7 +41,9 @@ class AppointmentDates(Base):
     __tablename__ = "appointment_dates"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    appointment_id = Column(Integer, ForeignKey("appointments.id", ondelete="CASCADE"), nullable=False)
+    appointment_id = Column(
+        Integer, ForeignKey("appointments.id", ondelete="CASCADE"), nullable=False
+    )
     candidate_date = Column(Date, nullable=False)
     __table_args__ = (UniqueConstraint("appointment_id", "candidate_date"),)
 

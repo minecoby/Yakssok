@@ -344,7 +344,7 @@ class AppointmentService:
     def _filter_slots_by_time_range(
         slots: List[dict], time_range_start: str = None, time_range_end: str = None
     ) -> List[dict]:
-        #저장된 가용 시간 슬롯을 시간대 필터로 제한
+        # 저장된 가용 시간 슬롯을 시간대 필터로 제한
         if not time_range_start and not time_range_end:
             return slots
 
@@ -400,6 +400,7 @@ class AppointmentService:
         db: AsyncSession,
     ) -> Appointments:
         from datetime import datetime
+
         
         # 약속 조회
         appointment = await AppointmentService.get_appointment_by_invite_code(

@@ -21,7 +21,7 @@ class Appointments(Base):
     name = Column(String(255), nullable=False)
     creator_id = Column(String(255))
     max_participants = Column(Integer, nullable=False)
-    status = Column(Enum("VOTING", "CONFIRMED", "CANCELED"), nullable=False)
+    status = Column(Enum("VOTING", "CONFIRMED"), nullable=False)
     invite_link = Column(String(255), unique=True)
     confirmed_date = Column(Date, nullable=True)
     confirmed_start_time = Column(String(5), nullable=True)

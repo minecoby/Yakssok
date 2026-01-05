@@ -21,13 +21,13 @@
   display: flex;
   width: 100vw;
   height: 100vh;
-  background-color: #F6FAED;
   overflow: hidden;
+  border-radius: 12px;
 }
 
 .main-content {
   flex: 1;
-  background: #FAFFF2;
+  background: #FDFDF8;
   border-radius: 15px 0 0 15px;
   padding: 0px;
   overflow-y: auto;
@@ -68,7 +68,7 @@
     font-weight: 500;
     color: #1f1f1f;
 
-    background-color: #FAFFF2;
+    background-color: #FDFDF8;
     border: 0.3px solid #1f1f1f;
     border-radius: 15px;
     outline: none;
@@ -91,7 +91,7 @@
     width: 63px;
     height: 74px;
     border-radius: 10px;
-    background: #EAEEE0;
+    background: #E9E9E3;
     border: none;
 
     margin-left: 29px;
@@ -144,7 +144,7 @@
 }
 
 .submit-button:disabled {
-  background: #EAEEE0;
+  background: #E9E9E3;
   color: #85837B;
   cursor: not-allowed;
 }

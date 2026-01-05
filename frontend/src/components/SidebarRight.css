@@ -18,7 +18,7 @@
   zoom: 0.85;
   width: min(505px, 92vw);
   height: 97%;
-  background: rgba(250, 255, 242, 0.7);
+  background: rgba(253, 253, 248, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: none; 

@@ -470,99 +470,72 @@ const Invited = () => {
   };
 
   if (viewMode === 'create') {
-    return (
-      <div className="invite-view-wrapper">
-        <div className="invite-view-panel">
-          <div className="invite-content-shell invite-fade-soft" key="create">
-            <CreateEvent
-              date={selectedDate}
-              onSave={saveNewEvent}
-              onCancel={() => setViewMode('list')}
-            />
-          </div>
-        </div>
-      </div>
-    );
+    return <CreateEvent date={selectedDate} onSave={saveNewEvent} onCancel={() => setViewMode('list')} />;
   }
 
   if (viewMode === 'update') {
-    return (
-      <div className="invite-view-wrapper">
-        <div className="invite-view-panel">
-          <div className="invite-content-shell invite-fade-soft" key="update">
-            <UpdateEvent
-              event={selectedEvent}
-              onSave={updateEvent}
-              onCancel={() => setViewMode('list')}
-            />
-          </div>
-        </div>
-      </div>
-    );
+    return <UpdateEvent event={selectedEvent} onSave={updateEvent} onCancel={() => setViewMode('list')} />;
   }
 
   const isDeleteMode = viewMode === 'delete';
 
   return (
-    <div className="invite-view-wrapper">
-      <div className="invite-view-panel">
-        <div className="invite-content-shell invite-fade-soft" key={viewMode}>
-          <div className="invite-container" onClick={() => setActiveMenuId(null)}>
+    <div className="invite-container" onClick={() => setActiveMenuId(null)}>
+      
+      <header className="invite-header">
+        {isDeleteMode ? (
+          <div className="delete-header-container">
+            <div className="delete-icon-wrapper">
+              <ExclamationIcon />
+            </div>
+            <h2 className="delete-header-title">
+              선택된 일정을<br/>삭제할까요?
+            </h2>
+          </div>
+        ) : (
+          <>
+            <div className="invitedLogo"> <LogoIconWhite /> </div>
+            <h1>{partyName || "약속"}</h1>
+            <p>{partyName || "약속"}에 초대되었어요</p>
+            <p>약속 범위 안에서 나의 일정이예요</p>
+          </>
+        )}
+      </header>
+      
+      <main className="main-content">
+        <div className="date-selector-container">
+          {candidateDates.length > 0 ? (
+            candidateDates.map((candidate, index) => {
+              const dayEvents = getEventsForDate(candidate.date); 
+              const hasEvent = dayEvents.length > 0;
+              const joinedTitles = dayEvents.map(e => e.title).join(", "); 
 
-            <header className="invite-header">
-              {isDeleteMode ? (
-                <div className="delete-header-container">
-                  <div className="delete-icon-wrapper">
-                    <ExclamationIcon />
-                  </div>
-                  <h2 className="delete-header-title">
-                    선택된 일정을<br/>삭제할까요?
-                  </h2>
-                </div>
-              ) : (
-                <>
-                  <div className="invitedLogo"> <LogoIconWhite /> </div>
-                  <h1>{partyName || "약속"}</h1>
-                  <p>{partyName || "약속"}에 초대되었어요</p>
-                  <p>약속 범위 안에서 나의 일정이예요</p>
-                </>
-              )}
-            </header>
+              const isSelectedForDelete = hasEvent && allEvents.some(e => {
+                  const eDate = new Date(e.start);
+                  eDate.setHours(0,0,0,0);
+                  const dDate = new Date(candidate.date);
+                  dDate.setHours(0,0,0,0);
+                  return eDate.getTime() === dDate.getTime() && selectedDeleteIds.includes(e.id);
+              });
 
-            <main className="main-content">
-              <div className="date-selector-container">
-                {candidateDates.length > 0 ? (
-                  candidateDates.map((candidate, index) => {
-                    const dayEvents = getEventsForDate(candidate.date);
-                    const hasEvent = dayEvents.length > 0;
-                    const joinedTitles = dayEvents.map(e => e.title).join(", ");
-
-                    const isSelectedForDelete = hasEvent && allEvents.some(e => {
-                        const eDate = new Date(e.start);
-                        eDate.setHours(0,0,0,0);
-                        const dDate = new Date(candidate.date);
-                        dDate.setHours(0,0,0,0);
-                        return eDate.getTime() === dDate.getTime() && selectedDeleteIds.includes(e.id);
-                    });
-
-                    return (
-                      <div
-                        key={index}
-                        className="event-box"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isDeleteMode && hasEvent) toggleDeleteSelection(candidate.date);
-                        }}
-                        style={{
-                          backgroundColor: hasEvent ? "#F9CBAA" : "#EAEEE0",
-                          color: hasEvent ? "#FFFFFF" : "#C4C5B7",
-                          cursor: isDeleteMode && hasEvent ? 'pointer' : 'default',
-                          opacity: isDeleteMode && !hasEvent ? 0.5 : 1
-                        }}
-                      >
-                        {isDeleteMode ? (
-                            hasEvent && (
-                                <div className="edit-icon-pos">
+              return (
+                <div 
+                  key={index} 
+                  className="event-box"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isDeleteMode && hasEvent) toggleDeleteSelection(candidate.date);
+                  }}
+                  style={{ 
+                    backgroundColor: hasEvent ? "#F9CBAA" : "#EAEEE0", 
+                    color: hasEvent ? "#FFFFFF" : "#C4C5B7",
+                    cursor: isDeleteMode && hasEvent ? 'pointer' : 'default',
+                    opacity: isDeleteMode && !hasEvent ? 0.5 : 1 
+                  }}
+                >
+                  {isDeleteMode ? (
+                      hasEvent && (
+                          <div className="edit-icon-pos">
                               {isSelectedForDelete ? <CheckCircleIcon /> : <EmptyCircleIcon />}
                           </div>
                       )
@@ -633,36 +606,33 @@ const Invited = () => {
       )}
 
       <footer>
-            {isDeleteMode ? (
-              <>
-              <button
-                className="confirm-btn"
-                style={{ background: '#1F1F1F', width: '100px' }}
-                onClick={confirmDelete}
-              >
-                네
-              </button>
-              <button
-                className="edit-btn"
-                style={{ width: '100px', background: '#F4F8E9', color: '#555' }}
-                onClick={() => {
-                  setViewMode('list');
-                  setSelectedDeleteIds([]);
-                }}
-              >
-                아니오
-              </button>
+        {isDeleteMode ? (
+            <>
+                <button 
+                    className="confirm-btn" 
+                    style={{ background: '#1F1F1F', width: '100px' }}
+                    onClick={confirmDelete}
+                >
+                    네
+                </button>
+                <button 
+                    className="edit-btn" 
+                    style={{ width: '100px', background: '#F4F8E9', color: '#555' }}
+                    onClick={() => {
+                        setViewMode('list');
+                        setSelectedDeleteIds([]);
+                    }}
+                >
+                    아니오
+                </button>
             </>
-            ) : (
-              <>
+        ) : (
+            <>
                 <button className="confirm-btn" onClick={handleConfirm}>확인</button>
                 <button className="edit-btn">나의 일정 수정하기</button>
-              </>
-            )}
-          </footer>
-        </div>
-      </div>
-    </div>
+            </>
+        )}
+      </footer>
     </div>
   );
 };

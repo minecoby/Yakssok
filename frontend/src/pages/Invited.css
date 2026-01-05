@@ -8,53 +8,6 @@
   flex-direction: column;
   align-items: center;
   padding-bottom: 40px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.invite-view-wrapper {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-}
-
-.invite-view-panel {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  flex: 1;
-}
-
-.invite-content-shell {
-  width: 100%;
-  max-width: 1280px;
-  padding: 20px 24px 60px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex: 1;
-  gap: 24px;
-  will-change: opacity;
-  margin: 0 auto;
-}
-
-.invite-fade-soft {
-  animation: inviteFadeOnly 0.55s ease;
-}
-
-@keyframes inviteFadeOnly {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
 }
 
 /* 헤더 (로고, 텍스트 영역) */

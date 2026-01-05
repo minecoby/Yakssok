@@ -509,24 +509,6 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   color: inherit !important;
 }
 
-.calendar-surface {
-  position: relative;
-}
-
-.fade-swap {
-  opacity: 0;
-  animation: calendarSoftFade 0.55s ease forwards;
-}
-
-@keyframes calendarSoftFade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
 
 
 

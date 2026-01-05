@@ -48,18 +48,10 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
-  transition:
-    border-color 0.25s,
-    background-color 0.25s,
-    box-shadow 0.25s,
-    transform 0.18s ease;
+  transition: border-color 0.25s;
 }
 button:hover {
   border-color: #646cff;
-}
-button:active {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) inset;
 }
 button:focus,
 button:focus-visible {

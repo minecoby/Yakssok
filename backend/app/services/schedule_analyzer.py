@@ -114,15 +114,46 @@ class ScheduleAnalyzer:
                     event["end"]["dateTime"].replace("Z", "+00:00")
                 )
 
-                event_date = start_dt.date()
-                if event_date in candidate_dates:
-                    events_by_date[event_date].append(
-                        {
-                            "start": start_dt.strftime("%H:%M"),
-                            "end": end_dt.strftime("%H:%M"),
-                            "all_day": False,
-                        }
-                    )
+                start_date = start_dt.date()
+                end_date = end_dt.date()
+
+                # 같은 날짜 내의 이벤트
+                if start_date == end_date:
+                    if start_date in candidate_dates:
+                        events_by_date[start_date].append(
+                            {
+                                "start": start_dt.strftime("%H:%M"),
+                                "end": end_dt.strftime("%H:%M"),
+                                "all_day": False,
+                            }
+                        )
+                # 여러 날에 걸친 이벤트
+                else:
+                    current_date = start_date
+                    while current_date <= end_date:
+                        if current_date in candidate_dates:
+                            if current_date == start_date:
+                                events_by_date[current_date].append(
+                                    {
+                                        "start": start_dt.strftime("%H:%M"),
+                                        "end": "23:59",
+                                        "all_day": False,
+                                    }
+                                )
+                            elif current_date == end_date:
+                                events_by_date[current_date].append(
+                                    {
+                                        "start": "00:00",
+                                        "end": end_dt.strftime("%H:%M"),
+                                        "all_day": False,
+                                    }
+                                )
+                            # 중간 날들: 종일로 처리
+                            else:
+                                events_by_date[current_date].append(
+                                    {"start": "00:00", "end": "23:59", "all_day": True}
+                                )
+                        current_date += timedelta(days=1)
 
         return events_by_date
 

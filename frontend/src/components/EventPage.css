@@ -13,7 +13,19 @@
   z-index: 9999; 
   display: flex;
   justify-content: center;
-  align-items: center;
+  animation: overlaySoftFade 0.45s ease;
+}
+
+@keyframes overlaySoftFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .event-page-container {

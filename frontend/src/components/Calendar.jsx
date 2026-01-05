@@ -176,6 +176,36 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
     if (api) setCurrentDate(api.getDate());
   };
 
+  const scrollToEarliestWeeklyEvent = useCallback(() => {
+  if (activeView !== 'timeGridWeek' || !calendarRef.current || !events.length) return;
+
+  const api = calendarRef.current.getApi();
+
+  const weeklyEvents = events
+    .map(e => e.start && new Date(e.start))
+    .filter(Boolean);
+
+  if (weeklyEvents.length === 0) return;
+
+  const earliest = weeklyEvents.reduce((min, d) => {
+    const mins = d.getHours() * 60 + d.getMinutes();
+    return Math.min(min, mins);
+  }, Infinity);
+
+  if (!Number.isFinite(earliest)) return;
+
+  const hour = Math.floor(earliest / 60);
+  const minute = earliest % 60;
+
+  api.scrollToTime({ hours: hour, minutes: minute });
+}, [activeView, events]);
+
+
+  // 주간 뷰 이동 시 가장 이른 일정 시간으로 자동 스크롤
+  useEffect(() => {
+    scrollToEarliestWeeklyEvent();
+  }, [scrollToEarliestWeeklyEvent]);
+
   // 요일 헤더 커스텀
   const getDayHeaderContent = (info) => {
     const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
@@ -337,7 +367,7 @@ const Calendar = ({ events: initialEvents = [] , onEventSelect }) => {
           slotMinTime="00:00:00"
           slotMaxTime="24:00:00"
           slotDuration="01:00:00"
-          height="auto"
+          height="100%"
           handleWindowResize={true}
 
           //우측 사이드바 관련 클릭 처리 (주간)

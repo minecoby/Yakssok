@@ -114,6 +114,7 @@ const CreateEvent = ({ date, onSave, onCancel }) => {
               className="time-input"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
+              onClick={(e) => e.target.showPicker?.()}
             />
           </div>
         </div>

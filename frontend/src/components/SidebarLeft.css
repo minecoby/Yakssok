@@ -90,17 +90,17 @@ button:focus {
   flex-direction: column;
 
   background: #e9ede2;
+  width: 100%;
+  transition: width 0.45s ease, padding 0.45s ease, opacity 0.35s ease;
 }
 
 /* 열린 상태 */
 .sidebarLeft.open {
-  width: 360px;
   padding: 30px;
 }
 
 /* 닫힌 상태 */
 .sidebarLeft.closed {
-  width: 120px;
   padding: 30px;
 }
 

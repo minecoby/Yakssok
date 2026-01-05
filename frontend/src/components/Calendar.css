@@ -2,7 +2,7 @@
 / 캘린더 전체 레이아웃 & 공통 스타일 /
 / ---------------------------------------------------- */
 .calendar-container {
-  background-color: #FAFFF2;
+  background-color: #FDFDF8 !important;
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -44,7 +44,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 
 .view-toggle-buttons {
   display: flex;
-  background: #EAEEE0;
+  background: #E9E9E3;
   border-radius: 20px;
   padding: 5px;
 }
@@ -61,7 +61,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 }
 
 .view-toggle-buttons button.active {
-  background: #FAFFF2;
+  background: #FDFDF8;
   box-shadow: 0px 3px 3px rgba(118, 113, 113, 0.07);
 }
 
@@ -75,7 +75,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   width: 50px;
   height: 50px;
   padding: 12px;
-  background: #EAEEE0;
+  background: #E9E9E3;
   border-radius: 15px;
   color: #85837B;
   font-size: 20px;
@@ -92,7 +92,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   padding: 10px 18px;
   background: #1F1F1F;
   border-radius: 15px;
-  color: #FAFFF2;
+  color: #E9E9E3;
   font-size: 15px;
   border: none;
   cursor: pointer;
@@ -132,7 +132,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   justify-content: flex-start; 
   overflow: hidden;
   align-items: flex-start;
-  background-color: #FAFFF2; 
+  background-color: #FDFDF8; 
 }
 
 /* 날짜 번호 */
@@ -235,7 +235,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 
 /* 과거/오늘/미래 이벤트 색상 */
 .past-event {
-  background: #EAEEE0; 
+  background: #E9E9E3; 
   color: #C4C5B7 !important;
 }
 
@@ -249,7 +249,7 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   color: #FFFFFF !important;
 }
 
-.past-event .event-title, .past-event .event-time-start { color: #C4C5B7 !important; }
+.past-event .event-title, .past-event .event-time-start { color: #E9E9E3 !important; }
 .today-event .event-title, .today-event .event-time-start { color: #FFFFFF !important; }
 .future-event .event-title, .future-event .event-time-start { color: #FFFFFF !important; }
 
@@ -355,13 +355,13 @@ button, .custom-header span, .fc-col-header-cell-cushion {
 /* 헤더 고정 */
 .fc-timegrid-header {
   top: 0;
-  background-color: #FAFFF2;
+  background-color: #FDFDF8;
   z-index: 10;
 }
 
 .fc-col-header,
 .fc-col-header table {
-  background-color: #FAFFF2;
+  background-color: #FDFDF8;
 }
 
 
@@ -509,6 +509,24 @@ button, .custom-header span, .fc-col-header-cell-cushion {
   color: inherit !important;
 }
 
+.calendar-surface {
+  position: relative;
+}
+
+.fade-swap {
+  opacity: 0;
+  animation: calendarSoftFade 0.55s ease forwards;
+}
+
+@keyframes calendarSoftFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
 
 
 

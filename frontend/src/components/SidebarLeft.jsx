@@ -11,7 +11,8 @@ import CalendarIcon from "../assets/CalendarIcon";
 import ListIcon from "../assets/ListIcon";
 import CalendarIconSelected from "../assets/CalendarIconSelected";
 import ListIconSelected from "../assets/ListIconSelected";
-import ListDot from "../assets/ListDot";
+import ListDot from "../assets/listDot";
+//import profileImage from "../assets/profile.jpg";
 
 /* 
   좌측 사이드바
@@ -20,17 +21,17 @@ import ListDot from "../assets/ListDot";
 
 */
 
-const SidebarLeft = ({ events = [] }) => {
+const SidebarLeft = ({ events = [], isOpen = false, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // 사이드바 상태
-  const [isOpen, setIsOpen] = useState(false);
+  //const [isOpen, setIsOpen] = useState(false);
 
   // 페이지 상태
   const isHomePage = location.pathname === "/home";
   const isCreatePage = location.pathname === "/create";
-  const isListPage = location.pathname == -"/list";
+  const isListPage = location.pathname === "/list";
 
   // 로고 상태
   const [isLogoHovered, setIsLogoHovered] = useState(false);
@@ -165,7 +166,7 @@ const SidebarLeft = ({ events = [] }) => {
           onMouseEnter={() => !isOpen && setIsLogoHovered(true)}
           onMouseLeave={() => setIsLogoHovered(false)}
         >
-          <button className="sidebarButton" onClick={() => setIsOpen(!isOpen)}>
+          <button className="sidebarButton" onClick={() => onToggle?.(!isOpen)}>
             {isOpen ? <CloseButton /> : <OpenButton />}
           </button>
           <LogoIcon className="logoIcon" />
@@ -178,10 +179,10 @@ const SidebarLeft = ({ events = [] }) => {
               <NewButton />
             </div>
           ) : (
-            <div
-              className={`buttonIconClosed ${isCreatePage ? "Rotated" : ""}`}
-            >
-              <NewButtonClosed />
+            <div className="buttonIconClosed">
+              <div className={isCreatePage ? "newButtonRotated" : ""}>
+                <NewButtonClosed />
+              </div>
             </div>
           )}
           {isOpen && <div className="buttonText">새로운 약속 만들기</div>}
@@ -202,29 +203,21 @@ const SidebarLeft = ({ events = [] }) => {
         {/* 약속 달력 */}
         <div className="calendar">
           <div className="calendarHeader">
-            <button className="moveMonth" onClick={() => moveMonth(-1)}>
-              {"<"}
-            </button>
+            <button className="moveMonth" onClick={() => moveMonth(-1)}>{"<"}</button>
             <span>{currentMonth + 1}월</span>
-            <button className="moveMonth" onClick={() => moveMonth(1)}>
-              {">"}
-            </button>
-            <button className="todayButton" onClick={handleGoToday}>
-              오늘
-            </button>
+            <button className="moveMonth" onClick={() => moveMonth(1)}>{">"}</button>
+            <button className="todayButton" onClick={handleGoToday}>오늘</button>
           </div>
 
           {/* 요일 */}
           <div className="calendarGrid daysofWeek">
             {daysOfWeek.map((day, index) => {
-              <div
-                key={day}
-                className={`dayName ${index === 0 ? "sunday" : ""} ${
-                  index === 6 ? "saturday" : ""
-                }`}
-              >
-                {day}
-              </div>;
+            <div
+              key={day}
+              className={`dayName ${index === 0 ? "sunday" : ""} ${index === 6 ? "saturday" : ""}`}
+            >
+              {day}
+            </div>
             })}
           </div>
 
@@ -241,7 +234,8 @@ const SidebarLeft = ({ events = [] }) => {
                   key={a.id}
                   className={`appointmentItem`}
                   onClick={() =>
-                    a.invite_link && navigate(`/result/${a.invite_link}`)
+                    a.invite_link &&
+                    navigate(`/result/${a.invite_link}`)
                   }
                 >
                   <ListDot />
@@ -253,7 +247,9 @@ const SidebarLeft = ({ events = [] }) => {
         </div>
 
         {/* 프로필 */}
-        <div className="profile" />
+        <div className="profile">
+          {/* <img src={profileImage} alt="profileImage" /> */}
+        </div>
       </div>
     </>
   );

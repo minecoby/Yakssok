@@ -1,18 +1,13 @@
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from typing import Optional
-<<<<<<< HEAD
 from app.variable import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-
-=======
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer
-from app.variable import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 security = HTTPBearer()
 
 
->>>>>>> develop
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
@@ -23,20 +18,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-<<<<<<< HEAD
-=======
-
->>>>>>> develop
 def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
-<<<<<<< HEAD
         return None
-=======
-        return None
-
 
 def get_current_user(token = Depends(security)):
     # JWT 토큰에서 현재 사용자 정보 추출
@@ -53,4 +40,3 @@ def get_current_user(token = Depends(security)):
         return payload
     except JWTError:
         raise credentials_exception
->>>>>>> develop

@@ -13,7 +13,6 @@ import './Invited.css';
 const Invited = () => {
   const { code } = useParams();
   const location = useLocation();
-
   const navigate = useNavigate();
   const initialEvents = location.state ? location.state.events : [];
   const initialEventsWithId = initialEvents.map((event, index) => ({

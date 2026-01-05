@@ -59,7 +59,7 @@ class ParticipationResponse(BaseModel):
     status: str
     available_slots: Optional[AvailableSlotsData] = None
 
-    @validator('available_slots', pre=True)
+    @validator("available_slots", pre=True)
     def parse_available_slots(cls, v):
         if v and isinstance(v, str):
             return json.loads(v)
@@ -90,7 +90,7 @@ class OptimalTimesResponse(BaseModel):
 
 class DateAvailability(BaseModel):
     date: date
-    availability: str 
+    availability: str
     available_count: int
     total_count: int
 
@@ -114,3 +114,9 @@ class AppointmentListResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SyncMySchedulesResponse(BaseModel):
+    total_appointments: int
+    updated_count: int
+    failed_count: int

@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPBearer
@@ -16,7 +15,6 @@ security = HTTPBearer()
 router = APIRouter(
     prefix="/user",
 )
-
 
 
 @router.get("/google/login")

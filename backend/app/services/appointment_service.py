@@ -305,7 +305,11 @@ class AppointmentService:
 
     @staticmethod
     async def calculate_optimal_times(
-        appointment_id: int, min_duration_minutes: int, db: AsyncSession
+        appointment_id: int,
+        min_duration_minutes: int,
+        db: AsyncSession,
+        time_range_start: str = None,
+        time_range_end: str = None,
     ) -> List[dict]:
         result = await db.execute(
             select(Participations)
@@ -322,7 +326,10 @@ class AppointmentService:
         for p in participations:
             try:
                 slots_data = json.loads(p.available_slots)
-                all_slots.append({"user_id": p.user_id, "slots": slots_data["slots"]})
+                filtered_slots = AppointmentService._filter_slots_by_time_range(
+                    slots_data["slots"], time_range_start, time_range_end
+                )
+                all_slots.append({"user_id": p.user_id, "slots": filtered_slots})
             except Exception:
                 pass
 
@@ -332,6 +339,56 @@ class AppointmentService:
         )
 
         return optimal_times
+
+    @staticmethod
+    def _filter_slots_by_time_range(
+        slots: List[dict], time_range_start: str = None, time_range_end: str = None
+    ) -> List[dict]:
+        #저장된 가용 시간 슬롯을 시간대 필터로 제한
+        if not time_range_start and not time_range_end:
+            return slots
+
+        from datetime import datetime
+
+        filter_start = (
+            datetime.strptime(time_range_start, "%H:%M").time()
+            if time_range_start
+            else datetime.strptime("00:00", "%H:%M").time()
+        )
+        filter_end = (
+            datetime.strptime(time_range_end, "%H:%M").time()
+            if time_range_end
+            else datetime.strptime("23:59", "%H:%M").time()
+        )
+
+        filtered_slots = []
+        for slot in slots:
+            date_str = slot["date"]
+            filtered_times = []
+
+            for time_range in slot.get("available_times", []):
+                start_time = datetime.strptime(time_range["start"], "%H:%M").time()
+                end_time = datetime.strptime(time_range["end"], "%H:%M").time()
+
+                # 필터 범위와 겹치는 부분만 추출
+                new_start = max(start_time, filter_start)
+                new_end = min(end_time, filter_end)
+
+                # 유효한 범위가 있으면 추가
+                if new_start < new_end:
+                    filtered_times.append(
+                        {
+                            "start": new_start.strftime("%H:%M"),
+                            "end": new_end.strftime("%H:%M"),
+                        }
+                    )
+
+            if filtered_times:
+                filtered_slots.append(
+                    {"date": date_str, "available_times": filtered_times}
+                )
+
+        return filtered_slots
 
     @staticmethod
     async def get_my_appointments(user_id: str, db: AsyncSession) -> List[Appointments]:

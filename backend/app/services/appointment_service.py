@@ -401,7 +401,6 @@ class AppointmentService:
     ) -> Appointments:
         from datetime import datetime
 
-        
         # 약속 조회
         appointment = await AppointmentService.get_appointment_by_invite_code(
             invite_code, db
@@ -416,6 +415,7 @@ class AppointmentService:
         # 이미 확정된 약속인지 확인
         if appointment.status == "CONFIRMED":
             raise ValueError("이미 확정된 약속입니다")
+        
         
         # 약속 확정
         appointment.status = "CONFIRMED"

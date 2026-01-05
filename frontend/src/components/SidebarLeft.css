@@ -71,11 +71,13 @@
   font-display: swap;
 }
 
+
 /* --- 기본 설정 초기화 --- */
 button:focus {
   outline: none;
   box-shadow: none;
 }
+
 
 /* --- 사이드바 컨테이너 --- */
 .sidebarLeft {
@@ -103,6 +105,7 @@ button:focus {
 .sidebarLeft.closed {
   padding: 30px;
 }
+
 
 /* --- 로고, 버튼 --- */
 .sidebarLeftLogo {
@@ -152,6 +155,7 @@ button:focus {
   top: 0;
   left: 250px;
 }
+
 
 /* --- 약속 생성 버튼 --- */
 .newButton {
@@ -214,6 +218,7 @@ button:focus {
   display: none;
 }
 
+
 /* --- 페이지 이동 버튼 --- */
 .iconRow {
   margin-bottom: 108px;
@@ -251,6 +256,7 @@ button:focus {
   color: #85837b;
   white-space: nowrap;
 }
+
 
 /* --- 약속 달력 --- */
 .calendar {
@@ -353,6 +359,7 @@ button:focus {
   border-radius: 4px;
 }
 
+
 /* --- 약속 목록 --- */
 .appointments {
   margin: 25px 0;
@@ -410,6 +417,7 @@ button:focus {
   color: #8aa24b;
 }
 
+
 /* --- 프로필 이미지 --- */
 .profile {
   position: absolute;
@@ -423,24 +431,4 @@ button:focus {
   overflow: hidden;
 
   background-color: #ffffff;
-}
-
-/* --- 프로필 이미지 --- */
-.profile {
-  position: absolute;
-  left: 38px;
-  bottom: 38px;
-
-  width: 45px;
-  height: 45px;
-
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.profile img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }

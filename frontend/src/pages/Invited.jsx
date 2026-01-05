@@ -42,8 +42,54 @@ const Invited = () => {
 
   const [selectedDeleteIds, setSelectedDeleteIds] = useState([]);
 
+  // 토큰 만료 여부 확인
+  const isAccessTokenExpired = useCallback((token) => {
+    if (!token) return true;
+
+    const parts = token.split('.');
+    if (parts.length < 2) return true;
+
+    try {
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const exp = payload?.exp;
+
+      if (!exp) return true;
+
+      return Date.now() >= exp * 1000;
+    } catch (error) {
+      console.warn('토큰 만료 여부 확인 중 문제가 발생했습니다.', error);
+      return true;
+    }
+  }, []);
+
+  // 로그인 리다이렉트 처리
+  const redirectToLogin = useCallback(() => {
+    if (code) {
+      sessionStorage.setItem('invite-code', code);
+      sessionStorage.setItem('invite-redirect', `/invite/${code}`);
+      navigate(`/login/${code}`, { replace: true });
+    } else {
+      sessionStorage.removeItem('invite-code');
+      sessionStorage.setItem('invite-redirect', location.pathname + location.search);
+      navigate('/login', { replace: true });
+    }
+  }, [code, navigate, location.pathname, location.search]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+
+    if (!token || isAccessTokenExpired(token)) {
+      localStorage.removeItem('access_token');
+      redirectToLogin();
+    }
+  }, [code, navigate, redirectToLogin, isAccessTokenExpired]);
+
   // 초대 링크 기반 약속 정보 불러오기
   useEffect(() => {
+    const token = localStorage.getItem('access_token');
+
+    if (!code || !token || isAccessTokenExpired(token)) return;
+
     const fetchAppointment = async () => {
       if (!code) return;
 
@@ -146,6 +192,12 @@ const Invited = () => {
           },
         });
 
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          redirectToLogin();
+          return;
+        }
+
         const data = await response.json();
 
         if (!response.ok) {
@@ -165,7 +217,7 @@ const Invited = () => {
     } catch (error) {
       console.error('캘린더 불러오기 중 오류가 발생했습니다.', error);
     }
-  }, [candidateDates, normalizeEvents]);
+  }, [candidateDates, normalizeEvents, redirectToLogin]);
 
   useEffect(() => {
     fetchUserEvents();
@@ -586,7 +638,7 @@ const Invited = () => {
                           if (isDeleteMode && hasEvent) toggleDeleteSelection(candidate.date);
                         }}
                         style={{
-                          backgroundColor: hasEvent ? "#F9CBAA" : "#EAEEE0",
+                          backgroundColor: hasEvent ? "#F9CBAA" : "#E9E9E3",
                           color: hasEvent ? "#FFFFFF" : "#C4C5B7",
                           cursor: isDeleteMode && hasEvent ? 'pointer' : 'default',
                           opacity: isDeleteMode && !hasEvent ? 0.5 : 1
@@ -676,7 +728,7 @@ const Invited = () => {
               </button>
               <button
                 className="edit-btn"
-                style={{ width: '100px', background: '#F4F8E9', color: '#555' }}
+                style={{ width: '100px', background: '#E9E9E3', color: '#555' }}
                 onClick={() => {
                   setViewMode('list');
                   setSelectedDeleteIds([]);

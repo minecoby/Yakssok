@@ -11,6 +11,13 @@ const Login = () => {
 
     const { code } = useParams();
 
+    useEffect(() => {
+        if (code) {
+            sessionStorage.setItem("invite-code", code);
+            sessionStorage.setItem("invite-redirect", `/invite/${code}`);
+        }
+    }, [code]);
+
     // 이제 AuthCallback.jsx에서 처리하므로 주석 처리
     // const navigateToHome = () => {
     // navigate("/home");
@@ -30,11 +37,13 @@ const Login = () => {
             const data = await response.json();
 
             if (!code) {
-                sessionStorage.removeItem("invite-code"); 
+                sessionStorage.removeItem("invite-code");
+                sessionStorage.removeItem("invite-redirect") 
                 window.location.href = data.auth_url;
             }
             else {
                 sessionStorage.setItem("invite-code", code); 
+                sessionStorage.setItem("invite-redirect", `/invite/${code}`);
                 window.location.href = data.auth_url;
             }
             

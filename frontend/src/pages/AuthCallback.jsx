@@ -11,20 +11,23 @@ const AuthCallback = () => {
     if (token) {
       localStorage.setItem("access_token", token);
 
-      const code = sessionStorage.getItem("invite-code"); 
-      sessionStorage.removeItem("invite-code"); 
+      const code = sessionStorage.getItem("invite-code");
+      const redirectPath = sessionStorage.getItem("invite-redirect");
+      sessionStorage.removeItem("invite-code");
+      sessionStorage.removeItem("invite-redirect");
 
       //navigate("/home", { replace: true });
       // OAuth 콜백에서는 window.location 사용
-      if (code === null) {
+      if (redirectPath) {
+        window.location.replace(redirectPath);
+      } else if (code !== null) {
+        window.location.replace(`/invite/${code}`);
+      } else {
         window.location.replace("/home");
       }
-      else {
-        window.location.replace(`/invite/${code}`);
-      }
-      
     } else {
       sessionStorage.removeItem("invite-code");
+      sessionStorage.removeItem("invite-redirect");
       navigate("/");
     }
   }, []);

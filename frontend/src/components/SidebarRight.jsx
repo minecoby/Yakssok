@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import "./SidebarRight.css";
 import closeButton from "../assets/closeButton.svg";
-import logo from "../assets/titleIcon.svg";
+import titleIcon from "../assets/titleIcon.svg";
 import CalendarStatic from "./CalendarStatic";
 import ClockStatic from "./ClockStatic";
 
@@ -85,7 +85,7 @@ const SidebarRight = ({ open, onClose, selectedPayload }) => {
         </div>
 
         <div className="title">
-            <img src={logo} alt="logo" className="logo"/>
+            <img src={titleIcon} alt="logo" className="logo"/>
             <span className="title-text">{selectedEvent?.title ?? "일정이 존재하지 않아요."}</span>
         </div>
 

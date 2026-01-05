@@ -11,8 +11,7 @@ import CalendarIcon from "../assets/CalendarIcon";
 import ListIcon from "../assets/ListIcon";
 import CalendarIconSelected from "../assets/CalendarIconSelected";
 import ListIconSelected from "../assets/ListIconSelected";
-import ListDot from "../assets/listDot";
-import profileImage from "../assets/profile.jpg";
+import ListDot from "../assets/ListDot";
 
 /* 
   좌측 사이드바
@@ -179,10 +178,10 @@ const SidebarLeft = ({ events = [] }) => {
               <NewButton />
             </div>
           ) : (
-            <div className="buttonIconClosed">
-              <div className={isCreatePage ? "newButtonRotated" : ""}>
-                <NewButtonClosed />
-              </div>
+            <div
+              className={`buttonIconClosed ${isCreatePage ? "Rotated" : ""}`}
+            >
+              <NewButtonClosed />
             </div>
           )}
           {isOpen && <div className="buttonText">새로운 약속 만들기</div>}
@@ -203,21 +202,29 @@ const SidebarLeft = ({ events = [] }) => {
         {/* 약속 달력 */}
         <div className="calendar">
           <div className="calendarHeader">
-            <button className="moveMonth" onClick={() => moveMonth(-1)}>{"<"}</button>
+            <button className="moveMonth" onClick={() => moveMonth(-1)}>
+              {"<"}
+            </button>
             <span>{currentMonth + 1}월</span>
-            <button className="moveMonth" onClick={() => moveMonth(1)}>{">"}</button>
-            <button className="todayButton" onClick={handleGoToday}>오늘</button>
+            <button className="moveMonth" onClick={() => moveMonth(1)}>
+              {">"}
+            </button>
+            <button className="todayButton" onClick={handleGoToday}>
+              오늘
+            </button>
           </div>
 
           {/* 요일 */}
           <div className="calendarGrid daysofWeek">
             {daysOfWeek.map((day, index) => {
-            <div
-              key={day}
-              className={`dayName ${index === 0 ? "sunday" : ""} ${index === 6 ? "saturday" : ""}`}
-            >
-              {day}
-            </div>
+              <div
+                key={day}
+                className={`dayName ${index === 0 ? "sunday" : ""} ${
+                  index === 6 ? "saturday" : ""
+                }`}
+              >
+                {day}
+              </div>;
             })}
           </div>
 
@@ -234,8 +241,7 @@ const SidebarLeft = ({ events = [] }) => {
                   key={a.id}
                   className={`appointmentItem`}
                   onClick={() =>
-                    a.invite_link &&
-                    navigate(`/result/${a.invite_link}`)
+                    a.invite_link && navigate(`/result/${a.invite_link}`)
                   }
                 >
                   <ListDot />
@@ -247,9 +253,7 @@ const SidebarLeft = ({ events = [] }) => {
         </div>
 
         {/* 프로필 */}
-        <div className="profile">
-          <img src={profileImage} alt="profileImage" />
-        </div>
+        <div className="profile" />
       </div>
     </>
   );

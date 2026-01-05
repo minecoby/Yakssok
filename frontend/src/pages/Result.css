@@ -198,7 +198,7 @@
 .setInput {
   background-color: #e9ede2;
   color: #292929;
-  width: 100px;
+  width: 60px;
   height: 60px;
   padding: 10px;
   margin: 10px;
@@ -213,12 +213,17 @@
   box-sizing: border-box;
 }
 
-select.setInput option {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 200;
-  font-size: 20px;
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 
 /* --- 추천 날짜 --- */
 .resultContent {
@@ -238,6 +243,7 @@ select.setInput option {
   margin: 45px;
   text-align: center;
 }
+
 
 /* --- 추천 날짜 목록 --- */
 .resultList {

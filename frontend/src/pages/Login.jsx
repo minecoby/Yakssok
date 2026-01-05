@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect } from "react"; 
 import './Login.css';
-import logoImage from "../assets/logo.png";
+import logo from "../assets/logo.png";
 import googleLogo from "../assets/googleLogo.png";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config/api";
@@ -35,7 +35,7 @@ const Login = () => {
 
     return (
         <div className='login-container'>
-            <img src={logoImage} alt="logoImage" className='logoImage'/>
+            <img src={logo} alt="logoImage" className='logoImage'/>
             <br />
             <span className='text'>약속 잡기,</span>
             <br />

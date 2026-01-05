@@ -15,8 +15,9 @@
 }
 
 .sidebar {
+  zoom: 0.85;
   width: min(505px, 92vw);
-  height: 100vh;
+  height: 97%;
   background: rgba(250, 255, 242, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

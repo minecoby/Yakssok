@@ -74,11 +74,6 @@ const Result = () => {
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   };
 
-  const hourOptions = useMemo(
-    () => Array.from({ length: 25 }, (_, i) => i),
-    []
-  );
-
   const isDurationEntered = durationHours !== "" && Number(durationHours) > 0;
   const isTimeRangeSelected = startHour !== "" && endHour !== "";
 
@@ -379,29 +374,27 @@ const Result = () => {
 
             <label>
               시간대는&nbsp;
-              <select
+              <input
+                type="number"
+                min="0"
+                max="24"
+                step="1"
                 value={startHour}
                 onChange={(e) => setStartHour(e.target.value)}
+                placeholder="0"
                 className="setInput"
-              >
-                {hourOptions.map((h) => (
-                  <option key={`s-${h}`} value={String(h)}>
-                    {String(h).padStart(2)}
-                  </option>
-                ))}
-              </select>
+              />
               &nbsp;시 부터&nbsp;
-              <select
+              <input
+                type="number"
+                min="0"
+                max="24"
+                step="1"
                 value={endHour}
                 onChange={(e) => setEndHour(e.target.value)}
+                placeholder="0"
                 className="setInput"
-              >
-                {hourOptions.map((h) => (
-                  <option key={`e-${h}`} value={String(h)}>
-                    {String(h).padStart(2)}
-                  </option>
-                ))}
-              </select>
+              />
               &nbsp;시 사이면 좋겠어요.
             </label>
 

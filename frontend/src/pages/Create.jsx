@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './Create.css';
 import SelectRange from '../components/SelectRange'; 
 import LinkPopup from "../components/LinkPopup";
-import logoImage from "../assets/createLogo.png";
+import createLogo from "../assets/createLogo.png";
 import { FRONT_BASE_URL } from '../config/front';
 import { API_BASE_URL } from '../config/api';
 import { useNavigate } from "react-router-dom";
@@ -143,7 +143,7 @@ const Create = () => {
             <main ref={mainRef} className='main-content'>
                 <form>
                     <div ref={titleRef}>
-                        <img src={logoImage} alt="logoImage" className='logoImage'/>
+                        <img src={createLogo} alt="logoImage" className='logoImage'/>
                         <br/>
                         <p className='request-text'>새로운 약속의 이름을 알려주세요</p>
                         <p className='input-index'>약속 이름</p>

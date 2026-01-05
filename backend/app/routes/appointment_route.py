@@ -166,6 +166,8 @@ async def delete_appointment(
 async def get_optimal_times(
     invite_code: str,
     min_duration_minutes: int = 60,
+    time_range_start: str = None,
+    time_range_end: str = None,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -184,7 +186,11 @@ async def get_optimal_times(
 
     # 최적 시간 계산
     optimal_times = await AppointmentService.calculate_optimal_times(
-        appointment.id, min_duration_minutes, db
+        appointment.id,
+        min_duration_minutes,
+        db,
+        time_range_start=time_range_start,
+        time_range_end=time_range_end,
     )
 
     # 전체 참여자 수

@@ -13,8 +13,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/login/:code" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        
+        <Route path="/auth/callback/:code" element={<AuthCallback />} />
         <Route element={<AppLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/invited" element={<Invited />} />

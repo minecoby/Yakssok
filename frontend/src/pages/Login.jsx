@@ -3,11 +3,13 @@ import { useEffect } from "react";
 import './Login.css';
 import logo from "../assets/logo.png";
 import googleLogo from "../assets/googleLogo.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE_URL } from "../config/api";
 
 const Login = () => {
     const navigate = useNavigate();
+
+    const { code } = useParams();
 
     // 이제 AuthCallback.jsx에서 처리하므로 주석 처리
     // const navigateToHome = () => {
@@ -27,7 +29,15 @@ const Login = () => {
             const response = await fetch(`${API_BASE_URL}/user/google/login`);
             const data = await response.json();
 
-            window.location.href = data.auth_url;
+            if (!code) {
+                sessionStorage.removeItem("invite-code"); 
+                window.location.href = data.auth_url;
+            }
+            else {
+                sessionStorage.setItem("invite-code", code); 
+                window.location.href = data.auth_url;
+            }
+            
         } catch (error) {
             console.error("구글 로그인 실패", error);
         }
